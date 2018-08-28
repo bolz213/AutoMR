@@ -10,16 +10,16 @@ The MRs are grouped according to the parameters: FuncIndex_NoOfInputs_ModeOfInpu
 >   - The degree of the polynomial output relation is 1 (i.e., linear).
 
 FuncIndex and its corresponding program:
-> |FuncIndex|Program|
+> |Program|Index|
 > |:----|:----|
 > |np.abs|1|
-> |np.acos|2|
-> |np.acosh|3|
-> |np.asin|4|
-> |np.asinh|5|
-> |np.atan|6|
-> |np.atan2|7|
-> |np.atanh|8|
+> |np.arccos|2|
+> |np.arccosh|3|
+> |np.arcsin|4|
+> |np.arcsinh|5|
+> |np.arctan|6|
+> |np.arctan2|7|
+> |np.arctanh|8|
 > |np.ceil|9|
 > |np.cos|10|
 > |np.cosh|11|
@@ -29,15 +29,15 @@ FuncIndex and its corresponding program:
 > |np.log|15|
 > |np.log1p|16|
 > |np.log10|17|
-> |np.max|18|
-> |np.min|19|
+> |np.amax|18|
+> |np.amin|19|
 > |np.round|20|
 > |np.sin|21|
 > |np.sinh|22|
 > |np.sqrt|23|
 > |np.tan|24|
 > |np.tanh|25|
-> ||26|
-> ||27|
-> ||28|
+> |np.dot|26|
+> |np.power|27|
+> |np.array_equal|28|
 > |np.sort|29|
