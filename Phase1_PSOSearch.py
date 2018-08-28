@@ -476,11 +476,11 @@ def main():
                                                           degree_of_output_relation),
                  min_cost_candidates=min_cost_candidates, A_candidates=np.array(A_candidates),
                  B_candidates=np.array(B_candidates))
-        print(f"func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run}")
-        print(A)
-        print(B)
-        print(f"cost is {min_cost}")
-        print("----------\n")
+        # print(f"func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run}")
+        # print(A)
+        # print(B)
+        # print(f"cost is {min_cost}")
+        # print("----------\n")
 
         pso_run += 1
         if not pso_run < pso_runs:
@@ -488,6 +488,8 @@ def main():
 
 
 if __name__ == "__main__":
+    print("----------")
+    print("start phase1: searching for MRs...")
     func_indices = ProgramToInfer.func_indices
     parameters_collection = ProgramToInfer.parameters_collection
 
@@ -516,10 +518,11 @@ if __name__ == "__main__":
             t1 = datetime.datetime.now()
             main()
             t2 = datetime.datetime.now()
-            cost_time = np.round((t2-t1).total_seconds(), decimals=2)
+            cost_time = np.round((t2-t1).total_seconds(), decimals=3)
 
             times.loc[f"{func_index}_{parameters}", "pso_iterations"] = pso_iterations
-            times.loc[f"{func_index}_{parameters}", "search_time"] = cost_time
+            times.loc[f"{func_index}_{parameters}", "phase1"] = cost_time
 
     times.to_csv(f"{output_path}/times.csv")
+    print("done")
 

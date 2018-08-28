@@ -4,7 +4,6 @@ import sys
 import itertools
 import pandas as pd
 import numpy as np
-import sympy as sp
 from sklearn.decomposition import TruncatedSVD
 import pickle
 import datetime
@@ -344,7 +343,7 @@ def svd_check(MRs, NEOI, NEOO):
         MRs_matrix_after_svd.append(c_after_svd[i])
         accu_ration += ratios[i]
 
-        if accu_ration > 0.95:
+        if accu_ration > 0.99:
             break
 
     MRs_df_after_svd = pd.DataFrame(MRs_matrix_after_svd, columns=y_all)
@@ -357,9 +356,15 @@ def main():
     if not os.path.isdir(f"{folder_path}/phase3"):
         os.mkdir(f"{folder_path}/phase3")
 
-    results = pd.read_csv(f"{folder_path}/results.csv", index_col=0)
+    if os.path.isfile(f"{folder_path}/results.csv"):
+        results = pd.read_csv(f"{folder_path}/results.csv", index_col=0)
+    else:
+        results = pd.DataFrame()
 
-    times = pd.read_csv(f"{folder_path}/times.csv", index_col=0)
+    if os.path.isfile(f"{folder_path}/times.csv"):
+        times = pd.read_csv(f"{folder_path}/times.csv", index_col=0)
+    else:
+        times = pd.DataFrame()
 
     for func_index in func_indices:
         stats_after_cs_svd_df = {}
@@ -415,7 +420,7 @@ def main():
             else:
                 # do svd for the type which has more than 1 MRs
                 if A_candidates_after_CS.shape[0] > 1:
-                    MRs_each_type_after_svd[parameters] = svd_check({parameters: AB_all_after_CS[parameters]}, NEI, NEO)
+                    MRs_each_type_after_svd[parameters] = list(svd_check({parameters: AB_all_after_CS[parameters]}, NEI, NEO))
                     stats_after_cs_svd_df[parameters] = MRs_each_type_after_svd[parameters][1].shape[0]
                 else:
                     stats_after_cs_svd_df[parameters] = A_candidates_after_CS.shape[0]
@@ -446,21 +451,21 @@ def main():
         MRs_group_after_svd = {}
         if len(MRs_equal_equal) > 0:
             t1 = datetime.datetime.now()
-            MRs_group_after_svd["x_1_1_x_x"] = svd_check(MRs_equal_equal, NEI, NEO)
+            MRs_group_after_svd["x_1_1_x_x"] = list(svd_check(MRs_equal_equal, NEI, NEO))
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), 2)
             time_cs_svd["x_1_1_x_x"] = cost_time
             stats_after_cs_svd_df["x_1_1_x_x"] = MRs_group_after_svd["x_1_1_x_x"][1].shape[0]
         if len(MRs_greater_equal) > 0:
             t1 = datetime.datetime.now()
-            MRs_group_after_svd["x_2_1_x_x"] = svd_check(MRs_greater_equal, NEI, NEO)
+            MRs_group_after_svd["x_2_1_x_x"] = list(svd_check(MRs_greater_equal, NEI, NEO))
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), 2)
             time_cs_svd["x_1_1_x_x"] = cost_time
             stats_after_cs_svd_df["x_2_1_x_x"] = MRs_group_after_svd["x_2_1_x_x"][1].shape[0]
         if len(MRs_less_equal) > 0:
             t1 = datetime.datetime.now()
-            MRs_group_after_svd["x_3_1_x_x"] = svd_check(MRs_greater_equal, NEI, NEO)
+            MRs_group_after_svd["x_3_1_x_x"] = list(svd_check(MRs_greater_equal, NEI, NEO))
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), 2)
             time_cs_svd["x_1_1_x_x"] = cost_time
@@ -473,22 +478,196 @@ def main():
         # save number of MRs after svd
         # print(stats_after_cs_svd_df)
         for parameters, number in stats_after_cs_svd_df.items():
-            results.loc[f"{func_index}_{parameters}", "after_vs_svd"] = number
+            results.loc[f"{func_index}_{parameters}", "phase3"] = number
+
 
         results.to_csv(f"{folder_path}/results.csv")
 
         for parameters, time in time_cs_svd.items():
-            times.loc[f"{func_index}_{parameters}", "cs_svd"] = time
+            times.loc[f"{func_index}_{parameters}", "phase3"] = time
 
         times.to_csv(f"{folder_path}/times.csv")
+
+def checkAfterSVD():
+    filer_phase3_df = pd.read_csv(f"{folder_path}/results.csv", index_col=0)
+    for func_index in func_indices:
+        no_of_elements_output = ProgramToInfer.getNEO(func_index)
+        no_of_elements_input = ProgramToInfer.getNEI(func_index)
+        inputcases_range = ProgramToInfer.get_input_range(func_index)
+
+        no_of_testcases = 100
+        MRs_types = os.listdir(f"{folder_path}/phase3")
+
+        for MRs_type in MRs_types:
+            # for the MRs stored in npz format
+            if MRs_type.startswith(f"{func_index}_") and MRs_type.endswith(".npz"):
+                pass
+            # for the MRs stored in pkl format
+            elif MRs_type.startswith(f"{func_index}_") and MRs_type.endswith("group_after_cs_svd.pkl"):
+                i0_all = Phase1_PSOSearch.generate_i0_all(inputcases_range, no_of_testcases, no_of_elements_input)
+
+                with open(f"{folder_path}/phase3/{MRs_type}", "rb") as f:
+                    MRs_dict = pickle.load(f)
+                for parameters, MRs in MRs_dict.items():
+                    filer_phase3 = 0
+                    # print(f"func_index is {func_index}, parameters = {parameters}")
+                    x_all_dict = MRs[0]
+                    # print(x_all_dict)
+                    y_all_df = MRs[1]
+                    hDIR = MRs[2]
+
+                    y_o_isKill_df = pd.DataFrame()
+                    for index_i0 in range(i0_all.shape[0]):
+                        i0 = i0_all[index_i0]
+                        u = Phase1_PSOSearch.comb(i0, hDIR)
+                        x_value_dict = {}
+                        y_element_value_dict = {}
+                        for x_name, A in x_all_dict.items():
+                            # print(f"x_name is {x_name}")
+                            # print(f"A is {A}")
+                            x = np.dot(A, u)
+                            x_value_dict[x_name] = x
+                            y = ProgramToInfer.program(x, func_index)
+                            for index_eo in range(no_of_elements_output):
+                                y_element_value_dict[f"f{x_name}_{index_eo + 1}"] = y[index_eo]
+                        y0 = ProgramToInfer.program(i0, func_index)
+                        for index_eo in range(no_of_elements_output):
+                            y_element_value_dict[f"fx0_{index_eo + 1}"] = y0[index_eo]
+                        y_all_names = y_all_df.columns.values
+                        y_all_values = np.zeros(y_all_names.shape)
+                        for index_y in range(y_all_names.shape[0]):
+                            y_names = list(y_all_names[index_y])
+                            y_elements = []
+                            for ii in range(len(y_names)):
+                                try:
+                                    y_elements.append(float(y_names[ii]))
+                                except:
+                                    y_elements.append(y_element_value_dict[y_names[ii]])
+                            y_all_values[index_y] = np.product(y_elements)
+                        for index_MR in range(y_all_df.shape[0]):
+                            B = y_all_df.iloc[index_MR, :].values
+                            Bv = np.dot(B, y_all_values)
+                            if np.isreal(Bv) and not np.isnan(Bv):
+                                if np.abs(Bv) < 0.1:
+                                    y_o_isKill_df.loc[index_MR, index_i0] = 0
+                                else:
+                                    y_o_isKill_df.loc[index_MR, index_i0] = 1
+                            else:
+                                y_o_isKill_df.loc[index_MR, index_i0] = 1
+
+
+
+                    for index_MR in range(y_o_isKill_df.shape[0]):
+                        kill_o_number = np.sum(y_o_isKill_df.iloc[index_MR, :].values)
+                        cost_o = np.divide(kill_o_number, no_of_testcases)
+                        if cost_o < 0.05:
+                            filer_phase3 += 1
+                        else:
+                            # print(MRs_dict[parameters][1])
+                            MRs_dict[parameters][1] = MRs_dict[parameters][1].drop([index_MR])
+                    # print("----------")
+                    # print(parameters)
+                    # print(f"before filter {len(y_all_df)}")
+                    # print(f"after filter left {filer_phase3}")
+
+                    filer_phase3_df.loc[f"{func_index}_{parameters}", "phase3"] = filer_phase3
+
+                with open(f"{folder_path}/phase3/{func_index}_MRs_group_after_cs_svd.pkl", "wb") as f2:
+                    pickle.dump(MRs_dict, f2, pickle.HIGHEST_PROTOCOL)
+
+            elif MRs_type.startswith(f"{func_index}_") and MRs_type.endswith("each_type_after_cs_svd.pkl"):
+                i0_all = Phase1_PSOSearch.generate_i0_all(inputcases_range, no_of_testcases, no_of_elements_input)
+
+                with open(f"{folder_path}/phase3/{MRs_type}", "rb") as f:
+                    MRs_dict = pickle.load(f)
+                for parameters, MRs in MRs_dict.items():
+                    filer_phase3 = 0
+                    parameters_int = [int(e) for e in parameters.split("_")]
+                    no_of_inputs = parameters_int[0]
+                    mode_input_relation = parameters_int[1]
+                    mode_output_relation = parameters_int[2]
+                    degree_of_input_relation = parameters_int[3]
+                    degree_of_output_relation = parameters_int[4]
+
+                    x_all_dict = MRs[0]
+                    y_all_df = MRs[1]
+
+                    y_o_isKill_df = pd.DataFrame()
+
+                    for index_i0 in range(i0_all.shape[0]):
+                        i0 = i0_all[index_i0]
+                        u = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
+                        # print(u)
+                        x_value_dict = {}
+                        y_element_value_dict = {}
+                        for x_name, A in x_all_dict.items():
+                            # print(x_name)
+                            # print(A)
+                            x = np.dot(A, u)
+                            x_value_dict[x_name] = x
+                            y = ProgramToInfer.program(x, func_index)
+                            for index_eo in range(no_of_elements_output):
+                                y_element_value_dict[f"f{x_name}_{index_eo + 1}"] = y[index_eo]
+                        y0 = ProgramToInfer.program(i0, func_index)
+                        for index_eo in range(no_of_elements_output):
+                            y_element_value_dict[f"fx0_{index_eo + 1}"] = y0[index_eo]
+
+                        y_all_names = y_all_df.columns.values
+                        y_all_values = np.zeros(y_all_names.shape)
+                        for index_y in range(y_all_names.shape[0]):
+                            y_names = list(y_all_names[index_y])
+                            y_elements = []
+                            for ii in range(len(y_names)):
+                                try:
+                                    y_elements.append(float(y_names[ii]))
+                                except:
+                                    y_elements.append(y_element_value_dict[y_names[ii]])
+                            y_all_values[index_y] = np.product(y_elements)
+
+                        for index_MR in range(y_all_df.shape[0]):
+                            B = y_all_df.iloc[index_MR, :].values
+                            Bv = np.dot(B, y_all_values)
+                            if np.isreal(Bv) and not np.isnan(Bv):
+                                if np.abs(Bv) < 0.1:
+                                    y_o_isKill_df.loc[index_MR, index_i0] = 0
+                                else:
+                                    y_o_isKill_df.loc[index_MR, index_i0] = 1
+                            else:
+                                y_o_isKill_df.loc[index_MR, index_i0] = 1
+
+                    for index_MR in range(y_o_isKill_df.shape[0]):
+                        kill_o_number = np.sum(y_o_isKill_df.iloc[index_MR, :].values)
+                        cost_o = np.divide(kill_o_number, no_of_testcases)
+                        if cost_o < 0.05:
+                            filer_phase3 += 1
+                        else:
+                            MRs_dict[parameters][1] = MRs_dict[parameters][1].drop([index_MR])
+
+                    # print("----------")
+                    # print(parameters)
+                    # print(f"before filter {len(y_all_df)}")
+                    # print(f"after filter left {filer_phase3}")
+                    filer_phase3_df.loc[f"{func_index}_{parameters}", "phase3"] = filer_phase3
+
+                with open(f"{folder_path}/phase3/{func_index}_MRs_each_type_after_cs_svd.pkl", "wb") as f2:
+                    pickle.dump(MRs_dict, f2, pickle.HIGHEST_PROTOCOL)
+
+
+
+    filer_phase3_df.to_csv(f"{folder_path}/results.csv")
+
 
 if __name__ == '__main__':
 
     folder_path = ProgramToInfer.output_path
-    func_indices = [int(sys.argv[1])]
+    func_indices = ProgramToInfer.func_indices
     const_range = ProgramToInfer.const_range
     coeff_range = ProgramToInfer.coeff_range
     print("----------")
-    print("removing redundancy...")
+    print("start phase3: removing redundancy...")
     main()
+    checkAfterSVD()
     print("done")
+
+
+

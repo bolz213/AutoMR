@@ -17,15 +17,18 @@ def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, 
         for index_i0 in range(i0_all.shape[0]):
             i0 = i0_all[index_i0]
             comb_i0 = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
-            i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
-            o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
-            o_flatten = np.ravel(o)
-            comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
+            try:
+                i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
+                o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
+                o_flatten = np.ravel(o)
+                comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
 
-            distance = np.dot(B, comb_o)
-            if np.isreal(distance) and not np.isnan(distance):
-                if np.abs(distance) < 0.1:
-                    cost_of_AB -= 1.0 / i0_all.shape[0]
+                distance = np.dot(B, comb_o)
+                if np.isreal(distance) and not np.isnan(distance):
+                    if np.abs(distance) < 0.1:
+                        cost_of_AB -= 1.0 / i0_all.shape[0]
+            except:
+                pass
 
 
     elif mode_output_relation == 2:
@@ -34,38 +37,46 @@ def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, 
         for index_i0 in range(i0_all.shape[0]):
             i0 = i0_all[index_i0]
             comb_i0 = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
-            i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
-            o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
-            o_flatten = np.ravel(o)
-            comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
+            try:
+                i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
+                o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
+                o_flatten = np.ravel(o)
+                comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
 
-            distance = np.dot(B, comb_o)
-            if np.isreal(distance) and not np.isnan(distance):
-                if distance > 0:
-                    cost_of_AB -= 1.0 / i0_all.shape[0]
-
+                distance = np.dot(B, comb_o)
+                if np.isreal(distance) and not np.isnan(distance):
+                    if distance > 0:
+                        cost_of_AB -= 1.0 / i0_all.shape[0]
+            except:
+                pass
     elif mode_output_relation == 3:
         cost_of_AB = 1.0
 
         for index_i0 in range(i0_all.shape[0]):
             i0 = i0_all[index_i0]
             comb_i0 = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
-            i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
-            o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
-            o_flatten = np.ravel(o)
-            comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
+            try:
+                i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
+                o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
+                o_flatten = np.ravel(o)
+                comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
 
-            distance = np.dot(B, comb_o)
-            if np.isreal(distance) and not np.isnan(distance):
-                if distance < 0:
-                    cost_of_AB -= 1.0 / i0_all.shape[0]
+                distance = np.dot(B, comb_o)
+                if np.isreal(distance) and not np.isnan(distance):
+                    if distance < 0:
+                        cost_of_AB -= 1.0 / i0_all.shape[0]
+            except:
+                pass
 
     return cost_of_AB
 
 def main():
     no_of_inputcases = 100
 
-    file_statistics = pd.DataFrame()
+    if os.path.isfile(f"{output_path}/results.csv"):
+        file_statistics = pd.read_csv(f"{output_path}/results.csv", index_col=0)
+    else:
+        file_statistics = pd.DataFrame()
 
     parameters_int = [int(e) for e in parameters.split("_")]
     no_of_inputs = parameters_int[0]
@@ -134,18 +145,19 @@ def main():
 
     np.savez(f'{output_path}/phase2/{func_index}_{parameters}_after_filter.npz', A_candidates=A_candidates_after_filter, B_candidates=B_candidates_after_filter)
 
-    result = pd.DataFrame([[func_index, parameters, all_count, ini_count, survive_count]], columns=None)
-    pd.loc[f"{func_index}_{parameters}", "all_count"] = all_count
-    pd.loc[f"{func_index}_{parameters}", "ini_count"] = ini_count
-    pd.loc[f"{func_index}_{parameters}", "survive_count"] = survive_count
+    file_statistics.loc[f"{func_index}_{parameters}", "pso"] = all_count
+    file_statistics.loc[f"{func_index}_{parameters}", "phase1"] = ini_count
+    file_statistics.loc[f"{func_index}_{parameters}", "phase2"] = survive_count
 
     file_statistics.to_csv(f"{output_path}/results.csv")
 
-    print(f"\n----------")
-    print(f"file is {output_name}, func_index is {func_index}, parameters is {parameters}, all count is {all_count}, ini count is {ini_count}, survive count is {survive_count}")
+    # print(f"\n----------")
+    # print(f"file is {output_name}, func_index is {func_index}, parameters is {parameters}, all count is {all_count}, ini count is {ini_count}, survive count is {survive_count}")
 
 
 if __name__ == '__main__':
+    print("----------")
+    print("start phase2: filtering...")
     output_path = ProgramToInfer.output_path
 
     if os.path.isfile(f"{output_path}/times.csv"):
@@ -155,19 +167,11 @@ if __name__ == '__main__':
 
     output_names = os.listdir(f"{output_path}/phase1")
 
-    # skip the files that are already filtered
-    already = []
-    if os.path.isdir("{output_path}/phase2"):
-        already_files = os.listdir(f"{output_path}/phase2")
-        for file_name in already_files:
-            # example: 1_2_2_1_1_1_after_filter.npz
-            if file_name.endswith("npz"):
-                already.append(file_name[:-17])
-    else:
+    if not os.path.isdir(f"{output_path}/phase2"):
         os.mkdir(f"{output_path}/phase2")
 
     for output_name in output_names:
-        if output_name.endswith(".npz") and output_name[:-4] not in already:
+        if output_name.endswith(".npz") and output_name[:-4]:
             # exapmle: 21_2_1_1_1_1.npz
             func_index = int(output_name[0:-14])
             parameters = output_name[-13:-4]
@@ -175,8 +179,9 @@ if __name__ == '__main__':
             t1 = datetime.datetime.now()
             main()
             t2 = datetime.datetime.now()
-            cost_time = np.round((t2-t1).total_seconds(), 2)
+            cost_time = np.round((t2-t1).total_seconds(), 3)
 
-            times.loc[f"{func_index}_{parameters}", "filter"] = cost_time
+            times.loc[f"{func_index}_{parameters}", "phase2"] = cost_time
 
     times.to_csv(f"{output_path}/times.csv")
+    print("done")

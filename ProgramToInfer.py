@@ -85,7 +85,7 @@ parameters_collection = ["2_1_1_1_1", "2_1_1_1_2", "2_1_1_1_3", "3_1_1_1_1", "3_
                          "2_2_1_1_1", "2_3_1_1_1", "2_2_2_1_1", "2_2_3_1_1", "2_3_2_1_1", "2_3_3_1_1"]
 
 # path to store results
-output_path = "./output/test"
+output_path = "./output/temp"
 
 # search parameters
 pso_runs = 2
