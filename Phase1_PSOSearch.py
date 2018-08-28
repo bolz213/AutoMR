@@ -60,7 +60,7 @@ def generate_i0_all(inputcases_range, population_of_inputcases, no_of_elements_i
 def generate_i(i0, comb_i0, A, mode_input_relation):
     # print(A)
     i_1_to_end = np.dot(A, comb_i0.reshape(-1, 1)).reshape(A.shape[0], -1)
-
+    # print(i0.shape)
     # i_1_to_end = np.ones((A.shape[0], A.shape[1]))
     # for index_run in range(A.shape[0]):
     #     i_1_to_end[index_run] = np.dot(A[index_run], comb_i0)
@@ -68,14 +68,29 @@ def generate_i(i0, comb_i0, A, mode_input_relation):
     # equal input relation
     if mode_input_relation == 1:
         i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
-    # largerthan input relation. Only applicable to 2 inputs now.
-    elif mode_input_relation == 2:
-        i_1_to_end += np.random.uniform(low=0.1, high=1.0, size=i_1_to_end.shape)
-        i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
-    # lessthan input relation. Only applicable to 2 inputs now.
-    elif mode_input_relation == 3:
-        i_1_to_end -= np.random.uniform(low=0.1, high=1.0, size=i_1_to_end.shape)
-        i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
+
+    # inequality input relation. Only applicable to 2 inputs now.
+    else:
+        input_range = ProgramToInfer.get_input_range(func_index)
+        min_input = np.zeros((i0.shape))
+        max_input = np.zeros((i0.shape))
+        for index in i0.shape[0]:
+            min_input[index] = input_range[index][0]
+            max_input[index] = input_range[index][1]
+
+        i_1_to_end_min = np.tile(min_input, (i_1_to_end.shape[0], 1))
+        i_1_to_end_max = np.tile(max_input, (i_1_to_end.shape[0], 1))
+
+        if mode_input_relation == 2:
+            i_1_to_end += np.random.uniform(low=0.1, high=(i_1_to_end_max-i_1_to_end), size=i_1_to_end.shape)
+            i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
+        elif mode_input_relation == 3:
+            i_1_to_end -= np.random.uniform(low=0.1, high=(i_1_to_end-i_1_to_end_min), size=i_1_to_end.shape)
+            i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
+
+    datatypes = ProgramToInfer.get_input_datatype(func_index)
+    for index in range(i0.shape[0]):
+        i[index:index+1,...] = i[index:index+1,...].astype(datatypes[index])
     return i
 
 
@@ -98,15 +113,18 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
         for index_i0 in range(i0_all.shape[0]):
             i0 = i0_all[index_i0]
             comb_i0 = comb(i0, degree_of_input_relation)
-            i = generate_i(i0, comb_i0, A, mode_input_relation)
-            o = get_o(program, func_index, i, no_of_elements_output)
-            o_flatten = np.ravel(o)
-            comb_o = comb(o_flatten, degree_of_output_relation)
+            try:
+                i = generate_i(i0, comb_i0, A, mode_input_relation)
+                o = get_o(program, func_index, i, no_of_elements_output)
+                o_flatten = np.ravel(o)
+                comb_o = comb(o_flatten, degree_of_output_relation)
 
-            distance = np.dot(B, comb_o)
-            if np.isreal(distance) and not np.isnan(distance):
-                cost_of_AB += np.abs(distance)
-            else:
+                distance = np.dot(B, comb_o)
+                if np.isreal(distance) and not np.isnan(distance):
+                    cost_of_AB += np.abs(distance)
+                else:
+                    cost_of_AB = (cost_of_AB + 1.0) * 10.0
+            except:
                 cost_of_AB = (cost_of_AB + 1.0) * 10.0
 
 
@@ -116,15 +134,18 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
         for index_i0 in range(i0_all.shape[0]):
             i0 = i0_all[index_i0]
             comb_i0 = comb(i0, degree_of_input_relation)
-            i = generate_i(i0, comb_i0, A, mode_input_relation)
-            o = get_o(program, func_index, i, no_of_elements_output)
-            o_flatten = np.ravel(o)
-            comb_o = comb(o_flatten, degree_of_output_relation)
+            try:
+                i = generate_i(i0, comb_i0, A, mode_input_relation)
+                o = get_o(program, func_index, i, no_of_elements_output)
+                o_flatten = np.ravel(o)
+                comb_o = comb(o_flatten, degree_of_output_relation)
 
-            distance = np.dot(B, comb_o)
-            if np.isreal(distance) and not np.isnan(distance):
-                if distance > 0:
-                    cost_of_AB -= 1.0 / i0_all.shape[0]
+                distance = np.dot(B, comb_o)
+                if np.isreal(distance) and not np.isnan(distance):
+                    if distance > 0:
+                        cost_of_AB -= 1.0 / i0_all.shape[0]
+            except:
+                pass
 
     elif mode_output_relation == 3:
         cost_of_AB = 1.0
@@ -132,15 +153,18 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
         for index_i0 in range(i0_all.shape[0]):
             i0 = i0_all[index_i0]
             comb_i0 = comb(i0, degree_of_input_relation)
-            i = generate_i(i0, comb_i0, A, mode_input_relation)
-            o = get_o(program, func_index, i, no_of_elements_output)
-            o_flatten = np.ravel(o)
-            comb_o = comb(o_flatten, degree_of_output_relation)
+            try:
+                i = generate_i(i0, comb_i0, A, mode_input_relation)
+                o = get_o(program, func_index, i, no_of_elements_output)
+                o_flatten = np.ravel(o)
+                comb_o = comb(o_flatten, degree_of_output_relation)
 
-            distance = np.dot(B, comb_o)
-            if np.isreal(distance) and not np.isnan(distance):
-                if distance < 0:
-                    cost_of_AB -= 1.0 / i0_all.shape[0]
+                distance = np.dot(B, comb_o)
+                if np.isreal(distance) and not np.isnan(distance):
+                    if distance < 0:
+                        cost_of_AB -= 1.0 / i0_all.shape[0]
+            except:
+                pass
 
     return cost_of_AB
 
@@ -206,11 +230,11 @@ class PSO:
         self.Ashape0 = self.no_of_inputs - 1
 
     def generate_initial_A_all(self):
-        A_all_cons = np.round(np.random.uniform(low=self.const_range[0], high=self.const_range[1],
-                                       size=(self.no_of_particles, self.Ashape0, self.no_of_elements_input, 1)), decimals=2)
+        A_all_cons = np.random.uniform(low=self.const_range[0], high=self.const_range[1],
+                                       size=(self.no_of_particles, self.Ashape0, self.no_of_elements_input, 1))
         # print(A_all_cons)
-        A_all_coeff = np.round(np.random.uniform(low=self.coeff_range[0], high=self.coeff_range[1], size=(
-            self.no_of_particles, self.Ashape0, self.no_of_elements_input, (self.size_of_comb_i0 - 1))), decimals=1)
+        A_all_coeff = np.random.uniform(low=self.coeff_range[0], high=self.coeff_range[1], size=(
+            self.no_of_particles, self.Ashape0, self.no_of_elements_input, (self.size_of_comb_i0 - 1)))
 
         # prevent A from degradation
         for index_particle in range(self.no_of_particles):
@@ -455,22 +479,15 @@ def main():
         print(f"func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run}")
         print(A)
         print(B)
+        print(f"cost is {min_cost}")
         print("----------\n")
 
         pso_run += 1
         if not pso_run < pso_runs:
             break
 
-if __name__ == "__main__":
-    ## get parameters from command
-    # func_indices = [int(x) for x in sys.argv[1].strip(":").split(' ')]
-    # NOI = [int(x) for x in sys.argv[2].split(' ')]
-    # MIR = [int(x) for x in sys.argv[3].split(' ')]
-    # MOR = [int(x) for x in sys.argv[4].split(' ')]
-    # DIR = [int(x) for x in sys.argv[5].split(' ')]
-    # DOR = [int(x) for x in sys.argv[6].split(' ')]
 
-    # type in parameters
+if __name__ == "__main__":
     func_indices = ProgramToInfer.func_indices
     parameters_collection = ProgramToInfer.parameters_collection
 
@@ -487,8 +504,6 @@ if __name__ == "__main__":
         times = pd.DataFrame()
 
     for func_index in func_indices:
-        ProgramToInfer.setClasspath(func_index)
-        ProgramToInfer.setM(func_index)
         inputcases_range = ProgramToInfer.get_input_range(func_index)
 
         for parameters in parameters_collection:
@@ -504,7 +519,7 @@ if __name__ == "__main__":
             cost_time = np.round((t2-t1).total_seconds(), decimals=2)
 
             times.loc[f"{func_index}_{parameters}", "pso_iterations"] = pso_iterations
-            times.loc[f"{func_index}_{parameters}", "search"] = cost_time
+            times.loc[f"{func_index}_{parameters}", "search_time"] = cost_time
 
     times.to_csv(f"{output_path}/times.csv")
 
