@@ -1,7 +1,7 @@
 # AutoMR
 Help to discover polynomial metamorphic relations (MRs).
 
-## A very simple example
+## A simple example
 For the program ___max(*args)___, AutoMR will help you find that 
 - ___max(x<sup>(1)</sup>, x<sup>(2)</sup>, x<sup>(3)</sup>) - max(x<sup>(2)</sup>, x<sup>(1)</sup>, x<sup>(3)</sup>) = 0___
  - ___max(x<sup>(1)</sup>-1, x<sup>(2)</sup>-2, x<sup>(3)</sup>-3) - max(x<sup>(1)</sup>, x<sup>(2)</sup>, x<sup>(3)</sup>) < 0___
