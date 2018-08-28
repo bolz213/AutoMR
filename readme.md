@@ -9,7 +9,7 @@ For the program ___max(*args)___, AutoMR will help you find that
 
 ## How to use AutoMR
 
-### set parameters
+### 1. set parameters
 
 The information of the program which you want to infer MRs from should be set in ___ProgramToInfer.py___
 > 1. Encapsulate the program in _program(i, func_index)_. _i_ is an array containing all the values to be passed to the program. _func_index_ is the index assigned to the program, which is used when inferring MRs for various programs in a batch.
@@ -22,7 +22,7 @@ The information of the program which you want to infer MRs from should be set in
 > 8. Set the input domain in _get_input_range(func_index)_.
 > 9. Set the input data type in _get_input_datatype(func_index)_.
 
-### search (phase1), filter (phase2) and remove redundancy (phase3)
+### 2. search (phase1), filter (phase2) and remove redundancy (phase3)
 Execute the following three commands one by one. The results of each phase will be corresponding folder under the _output_path_.
 
 
@@ -41,7 +41,7 @@ Tested on:
 * z3-solver 4.5.1.0.post2
 * scikit-learn 0.19.2
 
-## If use the inferred MRs for testing (Each of the tested programs is called a mutant)
+### 3. If use the inferred MRs for testing (Each of the tested programs is called a mutant)
 
 #### set the parameters
 Set the parameters in ___ProgramToTest.py___.
