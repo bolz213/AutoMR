@@ -2,7 +2,7 @@
 Help to discover polynomial metamorphic relations (MRs).
 
 ## A simple example
-For the program ___max(*args)___, AutoMR will help you find that 
+For the program ___max(*args)___, AutoMR will help you find some interesting MRs: 
 - ___max(x<sup>(1)</sup>, x<sup>(2)</sup>, x<sup>(3)</sup>) - max(x<sup>(2)</sup>, x<sup>(1)</sup>, x<sup>(3)</sup>) = 0___
  - ___max(x<sup>(1)</sup>-1, x<sup>(2)</sup>-2, x<sup>(3)</sup>-2) - max(x<sup>(1)</sup>, x<sup>(2)</sup>, x<sup>(3)</sup>) < 0___
  - ...
