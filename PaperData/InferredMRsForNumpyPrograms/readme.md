@@ -1,6 +1,6 @@
-### This folder contains the inferred MRs for 29 programs in NumPy.
+### This folder contains the inferred MRs for 29 programs in NumPy 1.14.5.
 
-The MRs are grouped according to the parameters: FuncIndex_NoOfInputs_ModeOfInputRelation_ModeOfOutputRelation_DegreeOfInputRelation_DegreeOfOutputRelation.npz
+The MRs are grouped according to the parameters: FuncIndex_NoOfInputs_ModeOfInputRelation_ModeOfOutputRelation_DegreeOfInputRelation_DegreeOfOutputRelation
 > for example: 1_2_1_1_1_1.npz means:
 >   - They are the MRs for the program with FuncIndex 1,
 >   - The number of involved inputs is 2,

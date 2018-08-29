@@ -1,6 +1,6 @@
-### This folder contains the inferred MRs for 8 programs in Apache Commons Math.
+### This folder contains the inferred MRs for 8 programs in Apache Commons Math 2.2.
 
-The MRs are grouped according to the parameters: ProgramIndex_NoOfInputs_ModeOfInputRelation_ModeOfOutputRelation_DegreeOfInputRelation_DegreeOfOutputRelation.npz
+The MRs are grouped according to the parameters: ProgramIndex_NoOfInputs_ModeOfInputRelation_ModeOfOutputRelation_DegreeOfInputRelation_DegreeOfOutputRelation
 > for example: 1_2_1_1_1_1.npz means:
 >   - They are the MRs for the program of index 1,
 >   - The number of involved inputs is 2,
