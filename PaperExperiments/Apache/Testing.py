@@ -12,16 +12,14 @@ import Phase3_RemoveRedundancy
 
 
 def main():
+    filer_phase3_df = pd.DataFrame()
     for func_index in func_indices:
-        if os.path.isfile(f"{MRs_path}/testing.csv"):
-            stats = pd.read_csv(f"{MRs_path}/testing.csv", index_col=0)
-        else:
-            stats = pd.DataFrame()
-        program = ProgramToTest.get_mutant(func_index)
+        stats = pd.DataFrame()
+        program = ProgramToTest.get_program(func_index)
         number_of_mutants = ProgramToTest.get_number_of_mutants(func_index)
         no_of_elements_output = ProgramToInfer.getNEO(func_index)
         no_of_elements_input = ProgramToInfer.getNEI(func_index)
-        inputcases_range = ProgramToInfer.get_input_range(func_index)
+        inputcases_range = np.tile(ProgramToInfer.input_range, (no_of_elements_input, 1))
 
         no_of_testcases = 100
         MRs_types = os.listdir(f"{MRs_path}/phase3")
@@ -68,9 +66,11 @@ def main():
                                                                       no_of_elements_output)
 
                         if survive_cost_o < 0.05:
+                            filer_phase3 += 1
                             if survive_cost >= 0.05:
                                 isKill = 1
                                 break
+                    filer_phase3_df.loc[f"{func_index}_{parameters}", "filter_phase3"] = filer_phase3
                     stats.loc[f"{func_index}_{index_mutant}", parameters] = isKill
                     print(f"func_index is {func_index}, index_mutant is {index_mutant}, parameters is {parameters}, iskill is {isKill}")
 
@@ -83,6 +83,7 @@ def main():
                     with open(f"{MRs_path}/phase3/{MRs_type}", "rb") as f:
                         MRs_dict = pickle.load(f)
                     for parameters, MRs in MRs_dict.items():
+                        filer_phase3 = 0
                         # print(f"func_index is {func_index}, parameters = {parameters}")
                         if parameters[0] == "x":
                             x_all_dict = MRs[0]
@@ -181,6 +182,7 @@ def main():
                                 cost = np.divide(kill_number, no_of_testcases)
                                 cost_o = np.divide(kill_o_number, no_of_testcases)
                                 if cost_o < 0.05:
+                                    filer_phase3 += 1
                                     if cost >= 0.05:
                                         isKill = 1
                                         break
@@ -293,6 +295,7 @@ def main():
                                 cost = np.divide(kill_number, no_of_testcases)
                                 cost_o = np.divide(kill_o_number, no_of_testcases)
                                 if cost_o < 0.05:
+                                    filer_phase3 += 1
                                     if cost >= 0.05:
                                         isKill = 1
                                         break
@@ -300,10 +303,12 @@ def main():
                             stats.loc[f"{func_index}_{index_mutant}", parameters] = isKill
                             print(f"func_index is {func_index}, index_mutant is {index_mutant}, parameters is {parameters}, iskill is {isKill}")
 
+                        filer_phase3_df.loc[f"{func_index}_{parameters}", "filter_phase3"] = filer_phase3
 
             index_mutant += 1
 
-        stats.to_csv(f"{MRs_path}/testing.csv")
+        stats.to_csv(f"{MRs_path}/{func_index}_phase3_mutants.csv")
+    filer_phase3_df.to_csv(f"{MRs_path}/filter_phase3.csv")
 
 if __name__ == '__main__':
     MRs_path = ProgramToTest.MRs_path
