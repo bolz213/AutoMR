@@ -274,9 +274,6 @@ TSWLatexianTemp*
 # standalone packages
 *.sta
 ### Java template
-# Compiled class file
-*.class
-
 # Log file
 *.log
 
