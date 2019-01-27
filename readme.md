@@ -1,7 +1,7 @@
 # AutoMR
 Help to discover polynomial metamorphic relations (MRs).
 
-MRs describe the invariant relationships between program inputs and outputs. For example, when testing a program which calculates the $sin$ value for an input, it is not obvious for testers to determine the expected value of an arbitrary input. However, testers can test the programs by leveraging the mathematical property of the $sin$ function such as $sin(x)+sin(-x)=0$ and $sin(x)-sin(x+2\pi)=0$. These properties are MRs that should hold for all inputs of the program. In other words, testers can indirectly test the implementation by investigating whether the inputs and outputs satisfy the MRs. In this way, the program can be tested without knowing the correct outputs for arbitrary inputs.
+MRs describe the invariant relationships between program inputs and outputs. For example, when testing a program which calculates the sine value for an input, it is not obvious for testers to determine the expected value of an arbitrary input. However, testers can test the programs by leveraging the mathematical property of the sine function such as sin(x)+sin(-x)=0 and sin(x)-sin(x+2\pi)=0. These properties are MRs that should hold for all inputs of the program.
 
 AutoMR is a tool to identify and select high quality polynomial MRs, both equalities and inequalities. It uses a search-based method to discover MRs and integrates matrix SVD (singular-value decomposition) and constraint solving techniques to detect and remove redundant MRs in the search results.
 
