@@ -40,12 +40,17 @@ The information of the program which you want to infer MRs from should be set in
 ### 2. Search for MRs (Phase 1), filter the MRs (Phase 2) and remove redundant MRs (Phase 3)
 Execute the following three commands one by one. The results of each phase will be corresponding folder under the _output_path_.
 
-
 ```
     > python Phase1_PSOSearch.py
     > python Phase2_Filter.py
     > python Phase3_RemoveRedundancy.py
 ```
 
-### Example
+### example
+The ___ProgramToInfer.py___ has already set up for inferring MRs for __sine__ program. You can just clone and run to see its results.
+```
+    > python Phase1_PSOSearch.py
+```
+
+### Paper data
 Two set of examples in the folder "PapaerExperiments" aim to infer MRs from a number of NumPy and Apache Math programs.
