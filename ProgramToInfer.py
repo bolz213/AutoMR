@@ -13,9 +13,7 @@ def program(i, func_index):
     """
     if func_index == 1:
         x1 = i[0]
-        x2 = i[1]
-        o = np.array([np.hypot(x1, x2)])
-
+        o = np.array([np.sin(x1)])
     return o
 
 
@@ -26,7 +24,7 @@ def getNEI(func_index):
     :type func_index: int
     """
     if func_index in [1]:
-        no_of_elements_input = 2
+        no_of_elements_input = 1
 
     return no_of_elements_input
 
@@ -50,7 +48,7 @@ def get_input_range(func_index):
     :rtype: int
     """
     if func_index in [1]:
-        input_range = np.array([[0, 20], [0, 20]])
+        input_range = np.array([(0, 20)])
 
     return input_range
 
@@ -69,7 +67,7 @@ def get_input_datatype(func_index):
     :rtype: list
     """
     if func_index in [1]:
-        datatype = ["float16", "float16"]
+        datatype = ["float16"]
 
     return datatype
 
@@ -81,15 +79,14 @@ func_indices = [1]
 # NOI: number of inputs
 # MIR, MOR: mode of input and output relations. 1-equal, 2-greaterthan, 3-lessthan
 # DIR, DOR: degrees of input and output relations. 1-linear, 2-quadratic, etc.
-parameters_collection = ["2_1_1_1_1", "2_1_1_1_2", "2_1_1_1_3", "3_1_1_1_1", "3_1_1_1_2", "2_1_2_1_1", "2_1_3_1_1",
-                         "2_2_1_1_1", "2_3_1_1_1", "2_2_2_1_1", "2_2_3_1_1", "2_3_2_1_1", "2_3_3_1_1"]
+parameters_collection = ["2_1_1_1_1"]
 
 # path to store results
-output_path = "./output/temp"
+output_path = "./output/sine"
 
 # search parameters
-pso_runs = 2
-pso_iterations = 2
+pso_runs = 1
+pso_iterations = 500
 
 # set search range for coeff_range, const_range
 coeff_range = np.array([-2, 2])

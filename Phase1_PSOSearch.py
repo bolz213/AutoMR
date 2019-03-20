@@ -424,7 +424,6 @@ class PSO:
                 i0_all, A_all, A_v_all, B_all, B_v_all, A_all_p_best, B_all_p_best, index_g_best, omega,
                 cost_of_AB_all_p_best)
             min_cost = cost_of_AB_all_p_best[index_g_best]
-            # print(f'func_index is {func_index}, iteration is {iteration}, min_cost is {np.round(min_cost, decimals=3)}')
             ## break the iteration in advance if solution is found
             # if self.mode_output_relation == 1:
             #     if min_cost < 1:
@@ -432,6 +431,12 @@ class PSO:
             # else:
             #     if min_cost < 0.05:
             #         break
+            print(f'iteration is {iteration}, min_cost is {np.round(min_cost, decimals=3)}')
+            print("A:")
+            print(A_all_p_best[index_g_best])
+            print("B:")
+            print(B_all_p_best[index_g_best])
+            print("----------")
             iteration += 1
 
         A = A_all_p_best[index_g_best]
@@ -459,6 +464,8 @@ def main():
 
     pso_run = 0
     while True:
+        print("====================")
+        print(f"func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run}.")
         AutoMR = PSO(ProgramToInfer.program, func_index, no_of_inputs, mode_input_relation, mode_output_relation,
                      degree_of_input_relation, degree_of_output_relation, no_of_elements_input,
                      no_of_elements_output, no_of_particles, no_of_inputcases, inputcases_range,
@@ -476,14 +483,16 @@ def main():
                                                           degree_of_output_relation),
                  min_cost_candidates=min_cost_candidates, A_candidates=np.array(A_candidates),
                  B_candidates=np.array(B_candidates))
-        # print(f"func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run}")
-        # print(A)
-        # print(B)
-        # print(f"cost is {min_cost}")
-        # print("----------\n")
+        print(f"search results:")
+        print("A:")
+        print(A)
+        print("B:")
+        print(B)
+        print(f"Corresponding cost is {min_cost}")
+        print("----------\n")
 
         pso_run += 1
-        if not pso_run < pso_runs:
+        if pso_run >= pso_runs:
             break
 
 
@@ -494,6 +503,8 @@ if __name__ == "__main__":
     parameters_collection = ProgramToInfer.parameters_collection
 
     output_path = ProgramToInfer.output_path
+    if not os.path.isdir("./{}".format(output_path)):
+        os.mkdir("./{}".format(output_path))
     pso_runs = ProgramToInfer.pso_runs
     pso_iterations = ProgramToInfer.pso_iterations
 
