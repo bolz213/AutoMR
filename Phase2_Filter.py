@@ -8,7 +8,7 @@ import Phase1_PSOSearch
 
 
 # the cost function for one particle (a pair of A and B)
-def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, mode_output_relation,
+def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_output_relation,
                    degree_of_input_relation,
                    degree_of_output_relation, no_of_elements_output):
     if mode_output_relation == 1:
@@ -18,14 +18,14 @@ def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, 
             i0 = i0_all[index_i0]
             comb_i0 = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
             try:
-                i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
-                o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
+                i = Phase1_PSOSearch.generate_i(func_index,i0, comb_i0, A, mode_input_relation)
+                o = Phase1_PSOSearch.get_o(program, func_index, i)
                 o_flatten = np.ravel(o)
                 comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
 
                 distance = np.dot(B, comb_o)
                 if np.isreal(distance) and not np.isnan(distance):
-                    if np.abs(distance) < 0.1:
+                    if np.abs(distance) < 0.05:
                         cost_of_AB -= 1.0 / i0_all.shape[0]
             except:
                 pass
@@ -38,8 +38,8 @@ def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, 
             i0 = i0_all[index_i0]
             comb_i0 = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
             try:
-                i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
-                o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
+                i = Phase1_PSOSearch.generate_i(func_index, i0, comb_i0, A, mode_input_relation)
+                o = Phase1_PSOSearch.get_o(program, func_index, i)
                 o_flatten = np.ravel(o)
                 comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
 
@@ -56,8 +56,8 @@ def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, 
             i0 = i0_all[index_i0]
             comb_i0 = Phase1_PSOSearch.comb(i0, degree_of_input_relation)
             try:
-                i = Phase1_PSOSearch.generate_i(i0, comb_i0, A, mode_input_relation)
-                o = Phase1_PSOSearch.get_o(program_name, func_index, i, no_of_elements_output)
+                i = Phase1_PSOSearch.generate_i(func_index, i0, comb_i0, A, mode_input_relation)
+                o = Phase1_PSOSearch.get_o(program, func_index, i)
                 o_flatten = np.ravel(o)
                 comb_o = Phase1_PSOSearch.comb(o_flatten, degree_of_output_relation)
 
@@ -70,7 +70,7 @@ def get_cost_of_AB(program_name, func_index, A, B, i0_all, mode_input_relation, 
 
     return cost_of_AB
 
-def main():
+def phase2():
     no_of_inputcases = 100
 
     if os.path.isfile(f"{output_path}/results.csv"):
@@ -87,8 +87,6 @@ def main():
 
     no_of_elements_input = ProgramToInfer.getNEI(func_index)
     no_of_elements_output = ProgramToInfer.getNEO(func_index)
-
-    inputcases_range = np.tile([0, 20], (no_of_elements_input, 1))
 
     A_candidates_after_filter = []
     B_candidates_after_filter = []
@@ -110,7 +108,7 @@ def main():
         isPassPhase1 = False
 
         if mode_output_relation == 1:
-            if min_cost < 10.0:
+            if min_cost < 5:
                 ini_count += 1
                 isPassPhase1 = True
         else:
@@ -120,12 +118,8 @@ def main():
 
         if isPassPhase1:
             for index_test in range(100):
-                i0_all = Phase1_PSOSearch.generate_i0_all(inputcases_range, no_of_inputcases, no_of_elements_input)
-                survive_cost = get_cost_of_AB(ProgramToInfer.program, func_index, A, B, i0_all,
-                                              mode_input_relation,
-                                              mode_output_relation, degree_of_input_relation,
-                                              degree_of_output_relation,
-                                              no_of_elements_output)
+                i0_all = Phase1_PSOSearch.generate_i0_all(ProgramToInfer.get_input_datatype(func_index), ProgramToInfer.get_input_range(func_index), no_of_inputcases)
+                survive_cost = get_cost_of_AB(ProgramToInfer.program, func_index, A, B, i0_all, mode_input_relation, mode_output_relation, degree_of_input_relation, degree_of_output_relation, no_of_elements_output)
                 if survive_cost >= 0.05:
                     isPass = False
                     break
@@ -177,11 +171,10 @@ if __name__ == '__main__':
             parameters = output_name[-13:-4]
 
             t1 = datetime.datetime.now()
-            main()
+            phase2()
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), 3)
 
             times.loc[f"{func_index}_{parameters}", "phase2"] = cost_time
 
     times.to_csv(f"{output_path}/times.csv")
-    print("done")

@@ -3,80 +3,42 @@ import sys
 
 
 # program to infer MR from
-# i is the array containing the input arguments; o is the array containing the returning results
+# i is the array containing the input arguments (note that unary input is treated as a special case of multi-variate input)
+# o is the array containing the returning results (note that unary output is treated as a special case of multi-variate output)
+# func_index is assigned to facilitate batch processing for multiple programs
 def program(i, func_index):
-    """
-    :rtype: array
-    :type func_index: int
-    :type i: array
-    :
-    """
     if func_index == 1:
-        x1 = i[0]
-        o = np.array([np.sin(x1)])
-    return o
+        return np.sin(i)
+    elif func_index == 2:
+        return np.cos(i)
 
 
 # the number of elements of the input for the programs
 def getNEI(func_index):
-    """
-    :rtype: int
-    :type func_index: int
-    """
-    if func_index in [1]:
-        no_of_elements_input = 1
-
-    return no_of_elements_input
-
+    if func_index in [1,2]:
+        return 1
 
 # the number of elements of the output for the programs
 def getNEO(func_index):
-    """
-    :type func_index: int
-    :rtype: int
-    """
-    if func_index in [1]:
-        no_of_elements_output = 1
-
-    return no_of_elements_output
-
+    if func_index in [1,2]:
+        return 1
 
 # domain for each element of the input
 def get_input_range(func_index):
-    """
-    :type func_index: int
-    :rtype: int
-    """
-    if func_index in [1]:
-        input_range = np.array([(0, 20)])
-
-    return input_range
-
+    if func_index in [1,2]:
+        return [[0, 20]]
 
 # datatype for each element of the input:
-# int8	Byte (-128 to 127)
-# int16	Integer (-32768 to 32767)
-# int32	Integer (-2147483648 to 2147483647)
-# int64	Integer (-9223372036854775808 to 9223372036854775807)
-# float16	Half precision float: sign bit, 5 bits exponent, 10 bits mantissa
-# float32	Single precision float: sign bit, 8 bits exponent, 23 bits mantissa
-# float64	Double precision float: sign bit, 11 bits exponent, 52 bits mantissa
 def get_input_datatype(func_index):
-    """
-    :type func_index: int
-    :rtype: list
-    """
-    if func_index in [1]:
-        datatype = ["float16"]
-
-    return datatype
+    if func_index in [1,2]:
+        return [float]
 
 
 # which programs to infer MRs from
-func_indices = [1]
+func_indices = [1,2]
 
 # which type of MRs to infer: NOI_MIR_MOR_DIR_DOR.
-# NOI: number of inputs
+# NOI: number of involved inputs
 # MIR, MOR: mode of input and output relations. 1-equal, 2-greaterthan, 3-lessthan
 # DIR, DOR: degrees of input and output relations. 1-linear, 2-quadratic, etc.
 parameters_collection = ["2_1_1_1_1"]
@@ -85,9 +47,11 @@ parameters_collection = ["2_1_1_1_1"]
 output_path = "./output/sine"
 
 # search parameters
-pso_runs = 1
+pso_runs = 3
 pso_iterations = 500
 
-# set search range for coeff_range, const_range
-coeff_range = np.array([-2, 2])
-const_range = np.array([-10, 10])
+# set type and search range for coeff_range, const_range
+coeff_type = int
+const_type = float
+coeff_range = [-2, 2]
+const_range = [-10, 10]

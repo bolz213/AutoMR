@@ -352,7 +352,7 @@ def svd_check(MRs, NEOI, NEOO):
     return x_all, MRs_df_after_svd, hDIR
 
 
-def main():
+def phase3():
     if not os.path.isdir(f"{folder_path}/phase3"):
         os.mkdir(f"{folder_path}/phase3")
 
@@ -504,7 +504,7 @@ def checkAfterSVD():
                 pass
             # for the MRs stored in pkl format
             elif MRs_type.startswith(f"{func_index}_") and MRs_type.endswith("group_after_cs_svd.pkl"):
-                i0_all = Phase1_PSOSearch.generate_i0_all(inputcases_range, no_of_testcases, no_of_elements_input)
+                i0_all = Phase1_PSOSearch.generate_i0_all(ProgramToInfer.get_input_datatype(func_index), ProgramToInfer.get_input_range(func_index), no_of_testcases)
 
                 with open(f"{folder_path}/phase3/{MRs_type}", "rb") as f:
                     MRs_dict = pickle.load(f)
@@ -576,7 +576,7 @@ def checkAfterSVD():
                     pickle.dump(MRs_dict, f2, pickle.HIGHEST_PROTOCOL)
 
             elif MRs_type.startswith(f"{func_index}_") and MRs_type.endswith("each_type_after_cs_svd.pkl"):
-                i0_all = Phase1_PSOSearch.generate_i0_all(inputcases_range, no_of_testcases, no_of_elements_input)
+                i0_all = Phase1_PSOSearch.generate_i0_all(ProgramToInfer.get_input_datatype(func_index), ProgramToInfer.get_input_range(func_index), no_of_testcases)
 
                 with open(f"{folder_path}/phase3/{MRs_type}", "rb") as f:
                     MRs_dict = pickle.load(f)
@@ -658,15 +658,13 @@ def checkAfterSVD():
 
 
 if __name__ == '__main__':
-
     folder_path = ProgramToInfer.output_path
     func_indices = ProgramToInfer.func_indices
     const_range = ProgramToInfer.const_range
     coeff_range = ProgramToInfer.coeff_range
     print("----------")
     print("start phase3: removing redundancy...")
-    main()
-    checkAfterSVD()
+    phase3()
     print("done")
 
 

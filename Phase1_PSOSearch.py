@@ -4,14 +4,14 @@ import numpy as np
 import itertools
 import datetime
 from scipy import special
-import sys
+import random
 
 import ProgramToInfer
 
 # calculate how many combinations are there for choosing no_of_select elements from no_of_elements
 def get_size_of_comb(no_of_elements, no_of_select):
-    size_of_comb_with_degree = np.int(special.comb(no_of_elements, no_of_select, repetition=True))
-    return size_of_comb_with_degree
+    size_of_comb_with_degree = special.comb(no_of_elements, no_of_select, repetition=True)
+    return int(size_of_comb_with_degree)
 
 
 # given no_of_elements elements, evaluate the number of combinations with a highest_degree
@@ -22,12 +22,12 @@ def get_size_of_comb_with_highest_degree(no_of_elements, highest_degree):
         size_of_comb_with_degree = get_size_of_comb(no_of_elements, degree)
         size_of_comb += size_of_comb_with_degree
         degree += 1
-    return np.int(size_of_comb)
+    return int(size_of_comb)
 
 
 # given a vecor, return all the combinations that its elements can form
 def comb(vector, highest_degree):
-    comb_vector = np.array([1])
+    comb_vector = [1]
     degree = 1
     while degree < highest_degree + 1:
         comb_vector_with_degree = np.array(
@@ -36,34 +36,28 @@ def comb(vector, highest_degree):
         degree += 1
     return comb_vector
 
+def match_type(array, types):
+    inputcase_typed = []
+    for i,e in enumerate(array):
+        if types[i] is int:
+            inputcase_typed.append(round(e))
+        else:
+            inputcase_typed.append(e)
+    return inputcase_typed
 
-# generate all the i0 (i0_all) with the given population
-def generate_i0_all(inputcases_range, population_of_inputcases, no_of_elements_input):
-    # inputcases_lower = inputcases_range[:, 0]
-    # inputcases_upper = inputcases_range[:, 1]
-    # i0_all = np.tile([inputcases_lower], (population_of_inputcases, 1)) + np.tile([inputcases_upper - inputcases_lower],
-    #                                                                               (population_of_inputcases,
-    #                                                                                1)) * np.random.rand(
-    #     population_of_inputcases, no_of_elements_input)
+def generate_i0(input_types, input_ranges):
+    input_ranges = np.array(input_ranges)
+    i0 = np.random.uniform(low=input_ranges[:,0], high=input_ranges[:,1])
+    return match_type(i0, input_types)
 
-    inputcases_lower = inputcases_range[:, 0:1]
-    inputcases_upper = inputcases_range[:, 1:]
-    i0_all = np.empty((population_of_inputcases, no_of_elements_input))
-    for index_i0 in range(population_of_inputcases):
-        i0_all[index_i0] = np.random.uniform(low=inputcases_lower, high=inputcases_upper,
-                                             size=(no_of_elements_input, 1)).reshape(no_of_elements_input, )
-
-    return i0_all
+# generate base inputs (i0) for inputcases
+def generate_i0_all(input_types, input_ranges, population_of_inputcases):
+    return np.array([generate_i0(input_types, input_ranges) for i in range(population_of_inputcases)])
 
 
-# given i0 and A, return all the inputs for the relation
-def generate_i(i0, comb_i0, A, mode_input_relation):
-    # print(A)
-    i_1_to_end = np.dot(A, comb_i0.reshape(-1, 1)).reshape(A.shape[0], -1)
-    # print(i0.shape)
-    # i_1_to_end = np.ones((A.shape[0], A.shape[1]))
-    # for index_run in range(A.shape[0]):
-    #     i_1_to_end[index_run] = np.dot(A[index_run], comb_i0)
+# given i0 and A, return all the involved inputs for the relation
+def generate_i(func_index, i0, comb_i0, A, mode_input_relation):
+    i_1_to_end = np.dot(A, comb_i0)
 
     # equal input relation
     if mode_input_relation == 1:
@@ -82,23 +76,23 @@ def generate_i(i0, comb_i0, A, mode_input_relation):
         i_1_to_end_max = np.tile(max_input, (i_1_to_end.shape[0], 1))
 
         if mode_input_relation == 2:
-            i_1_to_end += np.random.uniform(low=0.1, high=(i_1_to_end_max-i_1_to_end), size=i_1_to_end.shape)
+            i_1_to_end = np.random.uniform(low=i_1_to_end, high=i_1_to_end_max, size=i_1_to_end.shape)
             i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
         elif mode_input_relation == 3:
-            i_1_to_end -= np.random.uniform(low=0.1, high=(i_1_to_end-i_1_to_end_min), size=i_1_to_end.shape)
+            i_1_to_end = np.random.uniform(low=i_1_to_end_min, high=i_1_to_end, size=i_1_to_end.shape)
             i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
 
-    datatypes = ProgramToInfer.get_input_datatype(func_index)
-    for index in range(i0.shape[0]):
-        i[index:index+1,...] = i[index:index+1,...].astype(datatypes[index])
+    input_types = ProgramToInfer.get_input_datatype(func_index)
+    for index in range(i.shape[0]):
+        i[index] = match_type(i[index], input_types)
     return i
 
 
 # calculate output(o)
-def get_o(program, func_index, i, no_of_elements_output):
-    o = np.zeros((i.shape[0], no_of_elements_output))
+def get_o(program, func_index, i):
+    o = []
     for index_i in range(i.shape[0]):
-        o[index_i] = program(i[index_i], func_index)
+        o.append(program(i[index_i], func_index))
     return o
 
 
@@ -106,7 +100,6 @@ def get_o(program, func_index, i, no_of_elements_output):
 def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_output_relation,
                    degree_of_input_relation,
                    degree_of_output_relation, no_of_elements_output):
-    # print(A)
     if mode_output_relation == 1:
         cost_of_AB = 0.0
 
@@ -114,13 +107,13 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
             i0 = i0_all[index_i0]
             comb_i0 = comb(i0, degree_of_input_relation)
             try:
-                i = generate_i(i0, comb_i0, A, mode_input_relation)
-                o = get_o(program, func_index, i, no_of_elements_output)
+                i = generate_i(func_index, i0, comb_i0, A, mode_input_relation)
+                o = get_o(program, func_index, i)
                 o_flatten = np.ravel(o)
                 comb_o = comb(o_flatten, degree_of_output_relation)
 
                 distance = np.dot(B, comb_o)
-                if np.isreal(distance) and not np.isnan(distance):
+                if not np.isnan(distance):
                     cost_of_AB += np.abs(distance)
                 else:
                     cost_of_AB = (cost_of_AB + 1.0) * 10.0
@@ -135,13 +128,13 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
             i0 = i0_all[index_i0]
             comb_i0 = comb(i0, degree_of_input_relation)
             try:
-                i = generate_i(i0, comb_i0, A, mode_input_relation)
-                o = get_o(program, func_index, i, no_of_elements_output)
+                i = generate_i(func_index, i0, comb_i0, A, mode_input_relation)
+                o = get_o(program, func_index, i)
                 o_flatten = np.ravel(o)
                 comb_o = comb(o_flatten, degree_of_output_relation)
 
                 distance = np.dot(B, comb_o)
-                if np.isreal(distance) and not np.isnan(distance):
+                if not np.isnan(distance):
                     if distance > 0:
                         cost_of_AB -= 1.0 / i0_all.shape[0]
             except:
@@ -154,13 +147,13 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
             i0 = i0_all[index_i0]
             comb_i0 = comb(i0, degree_of_input_relation)
             try:
-                i = generate_i(i0, comb_i0, A, mode_input_relation)
-                o = get_o(program, func_index, i, no_of_elements_output)
+                i = generate_i(func_index ,i0, comb_i0, A, mode_input_relation)
+                o = get_o(program, func_index, i)
                 o_flatten = np.ravel(o)
                 comb_o = comb(o_flatten, degree_of_output_relation)
 
                 distance = np.dot(B, comb_o)
-                if np.isreal(distance) and not np.isnan(distance):
+                if not np.isnan(distance):
                     if distance < 0:
                         cost_of_AB -= 1.0 / i0_all.shape[0]
             except:
@@ -232,14 +225,17 @@ class PSO:
     def generate_initial_A_all(self):
         A_all_cons = np.random.uniform(low=self.const_range[0], high=self.const_range[1],
                                        size=(self.no_of_particles, self.Ashape0, self.no_of_elements_input, 1))
-        # print(A_all_cons)
+        if ProgramToInfer.const_type is int:
+            A_all_cons = np.round(A_all_cons)
         A_all_coeff = np.random.uniform(low=self.coeff_range[0], high=self.coeff_range[1], size=(
             self.no_of_particles, self.Ashape0, self.no_of_elements_input, (self.size_of_comb_i0 - 1)))
 
         # prevent A from degradation
         for index_particle in range(self.no_of_particles):
             for index_input in range(self.no_of_inputs - 1):
-                A_all_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:] = anti_degrade(A_all_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:], 0.5)
+                A_all_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:] = anti_degrade(A_all_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:], 1)
+        if ProgramToInfer.coeff_type is int:
+            A_all_coeff = np.round(A_all_coeff)
 
         A_all = np.concatenate((A_all_cons, A_all_coeff), axis=3)
         # print(A_all)
@@ -248,13 +244,17 @@ class PSO:
     def generate_initial_B_all(self):
         B_all_cons = np.random.uniform(low=self.const_range[0], high=self.const_range[1],
                                        size=(self.shape_of_B_all[0], 1))
+        if ProgramToInfer.const_type is int:
+            B_all_cons = np.round(B_all_cons)
+
         B_all_coeff = np.random.uniform(low=self.coeff_range[0], high=self.coeff_range[1],
                                         size=(self.shape_of_B_all[0], (self.shape_of_B_all[1] - 1)))
-
         # keep B from degradation
         for index_particle in range(self.no_of_particles):
             B_all_coeff[index_particle:index_particle + 1, -self.indices_B_highest_degree:] = anti_degrade(
-                B_all_coeff[index_particle:index_particle + 1, -self.indices_B_highest_degree:], 0.5)
+                B_all_coeff[index_particle:index_particle + 1, -self.indices_B_highest_degree:], 1)
+        if ProgramToInfer.coeff_type is int:
+            B_all_coeff = np.round(B_all_coeff)
 
         B_all = np.concatenate((B_all_cons, B_all_coeff), axis=1)
         return B_all
@@ -318,7 +318,12 @@ class PSO:
         # prevent A from degradation
         for index_particle in range(self.no_of_particles):
             for index_input in range(self.no_of_inputs - 1):
-                A_all_next_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:] = anti_degrade(A_all_next_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:], 0.5)
+                A_all_next_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:] = anti_degrade(A_all_next_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:], 1)
+
+        if ProgramToInfer.const_type is int:
+            A_all_next_cons = np.round(A_all_next_cons)
+        if ProgramToInfer.coeff_type is int:
+            A_all_next_coeff = np.round(A_all_next_coeff)
 
         A_all_next = np.concatenate((A_all_next_cons, A_all_next_coeff), axis=3)
 
@@ -345,7 +350,12 @@ class PSO:
         # keep B from degradation
         for index_particle in range(self.no_of_particles):
             B_all_next_coeff[index_particle: index_particle + 1, -self.indices_B_highest_degree:] = anti_degrade(
-                B_all_next_coeff[index_particle: index_particle + 1, -self.indices_B_highest_degree:], 0.5)
+                B_all_next_coeff[index_particle: index_particle + 1, -self.indices_B_highest_degree:], 1)
+
+        if ProgramToInfer.const_type is int:
+            B_all_next_cons = np.round(B_all_next_cons)
+        if ProgramToInfer.coeff_type is int:
+            B_all_next_coeff = np.round(B_all_next_coeff)
 
         B_all_next = np.concatenate((B_all_next_cons, B_all_next_coeff), axis=1)
 
@@ -398,7 +408,7 @@ class PSO:
     #     return A_all_p_best_next, B_all_p_best_next, index_g_best
 
     def run(self):
-        i0_all = generate_i0_all(self.inputcases_range, self.no_of_inputcases, self.no_of_elements_input)
+        i0_all = generate_i0_all(ProgramToInfer.get_input_datatype(func_index), ProgramToInfer.get_input_range(func_index), self.no_of_inputcases)
         A_all = self.generate_initial_A_all()
         B_all = self.generate_initial_B_all()
 
@@ -431,12 +441,12 @@ class PSO:
             # else:
             #     if min_cost < 0.05:
             #         break
-            print(f'iteration is {iteration}, min_cost is {np.round(min_cost, decimals=3)}')
-            print("A:")
-            print(A_all_p_best[index_g_best])
-            print("B:")
-            print(B_all_p_best[index_g_best])
-            print("----------")
+            # print(f'iteration is {iteration}, min_cost is {np.round(min_cost, decimals=3)}')
+            # print("A:")
+            # print(A_all_p_best[index_g_best])
+            # print("B:")
+            # print(B_all_p_best[index_g_best])
+            # print("----------")
             iteration += 1
 
         A = A_all_p_best[index_g_best]
@@ -445,7 +455,7 @@ class PSO:
         return min_cost, A, B
 
 
-def main():
+def phase1():
     if not os.path.isdir(output_path):
         os.mkdir(output_path)
     if not os.path.isdir(f"{output_path}/phase1"):
@@ -464,8 +474,8 @@ def main():
 
     pso_run = 0
     while True:
-        print("====================")
-        print(f"func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run}.")
+        # print("====================")
+        print(f"    searching: func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run+1}.")
         AutoMR = PSO(ProgramToInfer.program, func_index, no_of_inputs, mode_input_relation, mode_output_relation,
                      degree_of_input_relation, degree_of_output_relation, no_of_elements_input,
                      no_of_elements_output, no_of_particles, no_of_inputcases, inputcases_range,
@@ -483,13 +493,13 @@ def main():
                                                           degree_of_output_relation),
                  min_cost_candidates=min_cost_candidates, A_candidates=np.array(A_candidates),
                  B_candidates=np.array(B_candidates))
-        print(f"search results:")
-        print("A:")
-        print(A)
-        print("B:")
-        print(B)
-        print(f"Corresponding cost is {min_cost}")
-        print("----------\n")
+        # print(f"search results:")
+        # print("A:")
+        # print(A)
+        # print("B:")
+        # print(B)
+        # print(f"Corresponding cost is {min_cost}")
+        # print("----------\n")
 
         pso_run += 1
         if pso_run >= pso_runs:
@@ -497,7 +507,6 @@ def main():
 
 
 if __name__ == "__main__":
-    print("----------")
     print("start phase1: searching for MRs...")
     func_indices = ProgramToInfer.func_indices
     parameters_collection = ProgramToInfer.parameters_collection
@@ -527,7 +536,7 @@ if __name__ == "__main__":
             degree_of_input_relation = parameters_int[3]
             degree_of_output_relation = parameters_int[4]
             t1 = datetime.datetime.now()
-            main()
+            phase1()
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), decimals=3)
 
@@ -535,5 +544,4 @@ if __name__ == "__main__":
             times.loc[f"{func_index}_{parameters}", "phase1"] = cost_time
 
     times.to_csv(f"{output_path}/times.csv")
-    print("done")
 
