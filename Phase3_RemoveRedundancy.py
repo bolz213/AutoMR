@@ -356,13 +356,13 @@ def phase3():
     if not os.path.isdir(f"{folder_path}/phase3"):
         os.mkdir(f"{folder_path}/phase3")
 
-    if os.path.isfile(f"{folder_path}/results.csv"):
-        results = pd.read_csv(f"{folder_path}/results.csv", index_col=0)
+    if os.path.isfile(f"{folder_path}/counts.csv"):
+        results = pd.read_csv(f"{folder_path}/counts.csv", index_col=0)
     else:
         results = pd.DataFrame()
 
-    if os.path.isfile(f"{folder_path}/times.csv"):
-        times = pd.read_csv(f"{folder_path}/times.csv", index_col=0)
+    if os.path.isfile(f"{folder_path}/performance.csv"):
+        times = pd.read_csv(f"{folder_path}/performance.csv", index_col=0)
     else:
         times = pd.DataFrame()
 
@@ -481,15 +481,15 @@ def phase3():
             results.loc[f"{func_index}_{parameters}", "phase3"] = number
 
 
-        results.to_csv(f"{folder_path}/results.csv")
+        results.to_csv(f"{folder_path}/counts.csv")
 
         for parameters, time in time_cs_svd.items():
             times.loc[f"{func_index}_{parameters}", "phase3"] = time
 
-        times.to_csv(f"{folder_path}/times.csv")
+        times.to_csv(f"{folder_path}/performance.csv")
 
 def checkAfterSVD():
-    filer_phase3_df = pd.read_csv(f"{folder_path}/results.csv", index_col=0)
+    filer_phase3_df = pd.read_csv(f"{folder_path}/counts.csv", index_col=0)
     for func_index in func_indices:
         no_of_elements_output = ProgramToInfer.getNEO(func_index)
         no_of_elements_input = ProgramToInfer.getNEI(func_index)
@@ -654,7 +654,7 @@ def checkAfterSVD():
 
 
 
-    filer_phase3_df.to_csv(f"{folder_path}/results.csv")
+    filer_phase3_df.to_csv(f"{folder_path}/counts.csv")
 
 
 if __name__ == '__main__':

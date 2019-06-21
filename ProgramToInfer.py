@@ -35,7 +35,7 @@ def get_input_datatype(func_index):
 
 
 # which programs to infer MRs from
-func_indices = [1,2]
+func_indices = [1]
 
 # which type of MRs to infer: NOI_MIR_MOR_DIR_DOR.
 # NOI: number of involved inputs

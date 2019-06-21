@@ -73,8 +73,8 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
 def phase2():
     no_of_inputcases = 100
 
-    if os.path.isfile(f"{output_path}/results.csv"):
-        file_statistics = pd.read_csv(f"{output_path}/results.csv", index_col=0)
+    if os.path.isfile(f"{output_path}/"):
+        file_statistics = pd.read_csv(f"{output_path}/counts.csv", index_col=0)
     else:
         file_statistics = pd.DataFrame()
 
@@ -143,7 +143,7 @@ def phase2():
     file_statistics.loc[f"{func_index}_{parameters}", "phase1"] = ini_count
     file_statistics.loc[f"{func_index}_{parameters}", "phase2"] = survive_count
 
-    file_statistics.to_csv(f"{output_path}/results.csv")
+    file_statistics.to_csv(f"{output_path}/counts.csv")
 
     # print(f"\n----------")
     # print(f"file is {output_name}, func_index is {func_index}, parameters is {parameters}, all count is {all_count}, ini count is {ini_count}, survive count is {survive_count}")
@@ -154,8 +154,8 @@ if __name__ == '__main__':
     print("start phase2: filtering...")
     output_path = ProgramToInfer.output_path
 
-    if os.path.isfile(f"{output_path}/times.csv"):
-        times = pd.read_csv(f"{output_path}/times.csv", index_col=0)
+    if os.path.isfile(f"{output_path}/performance.csv"):
+        times = pd.read_csv(f"{output_path}/performance.csv", index_col=0)
     else:
         times = pd.DataFrame()
 
@@ -177,4 +177,4 @@ if __name__ == '__main__':
 
             times.loc[f"{func_index}_{parameters}", "phase2"] = cost_time
 
-    times.to_csv(f"{output_path}/times.csv")
+    times.to_csv(f"{output_path}/performance.csv")

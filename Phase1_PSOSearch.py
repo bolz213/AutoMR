@@ -512,16 +512,16 @@ if __name__ == "__main__":
     parameters_collection = ProgramToInfer.parameters_collection
 
     output_path = ProgramToInfer.output_path
-    if not os.path.isdir("./{}".format(output_path)):
-        os.mkdir("./{}".format(output_path))
+    if not os.path.isdir("{}".format(output_path)):
+        os.mkdir(output_path)
     pso_runs = ProgramToInfer.pso_runs
     pso_iterations = ProgramToInfer.pso_iterations
 
     coeff_range = ProgramToInfer.coeff_range
     const_range = ProgramToInfer.const_range
 
-    if os.path.isfile(f"{output_path}/times.csv"):
-        times = pd.read_csv(f"{output_path}/times.csv", index_col=0)
+    if os.path.isfile(f"{output_path}/performance.csv"):
+        times = pd.read_csv(f"{output_path}/performance.csv", index_col=0)
     else:
         times = pd.DataFrame()
 
@@ -540,8 +540,8 @@ if __name__ == "__main__":
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), decimals=3)
 
-            times.loc[f"{func_index}_{parameters}", "pso_iterations"] = pso_iterations
+            # times.loc[f"{func_index}_{parameters}", "pso_iterations"] = pso_iterations
             times.loc[f"{func_index}_{parameters}", "phase1"] = cost_time
 
-    times.to_csv(f"{output_path}/times.csv")
+    times.to_csv(f"{output_path}/performance.csv")
 
