@@ -1,7 +1,7 @@
 # AutoMR
 Help to discover polynomial metamorphic relations (MRs).
 
-_A Simple Example:_ For the program ___sin(x)___, it can be implemented in math packages as series:
+_A Simple Example:_ To calculate ___sin(x)___, the program can be implemented as series:
 ```
 sin(x) ≈ x - (x^3)/3! + (x^5)/5! - (x^7)/7! ...
 ```
