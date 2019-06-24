@@ -47,12 +47,12 @@ if __name__ == '__main__':
                         hDIR = MRs[2]
                     else:
                         x_all_dict = MRs[0]
-                        print(f"    input relation A: (each row denotes the coefficients for constructing this input from the base input. Please see the paper for details.)")
+                        print(f"    input relation: (each row denotes the coefficients for constructing this input from the base input. Please see the paper for details.)")
                         for key, value in x_all_dict.items():
                             print(f"    {key}: {value}")
                         y_all_df = MRs[1]
                         consts = y_all_df["1"]
                         coeffs = y_all_df.drop("1", axis=1)
                         y_all_df = pd.concat([consts, coeffs], axis=1)
-                        print(f"    output relation B: (each row represents one MR; column named '1' denotes the constant term; column named 'fx0_1' denotes the coefficient for the first element of output of x0; column named 'fx0_2' (if output has more than one elements) denotes the coefficient for the second element of output of x0; column named 'fx1_1' denotes the coefficient for the first element of output of x1, etc.)")
+                        print(f"    output relation: (each row represents one MR; column named '1' denotes the constant term; column named 'fx0_1' denotes the coefficient for the first element of output of x0; column named 'fx0_2' (if output has more than one elements) denotes the coefficient for the second element of output of x0; column named 'fx1_1' denotes the coefficient for the first element of output of x1, etc.)")
                         print(f"{y_all_df}")
