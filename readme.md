@@ -93,5 +93,5 @@ or the second element of output of x0; column named 'fx1_1' denotes the coeffici
 1  7.408425e-17  1.110223e-16   0.00000  0.707107 -0.707107
 ```
 
-### Paper data
-The folder "PaperResults" contain the results of inferred MRs from a number of NumPy and Apache Math programs.
+### Associated Paper
+The folder "Associated_research_paper" contain the research paper manuscript and the experimental data (results of inferred MRs from a number of NumPy and Apache Math programs).
