@@ -1,5 +1,5 @@
 # AutoMR
-Help to discover polynomial metamorphic relations (MRs).
+A tool to discover polynomial metamorphic relations (MRs).
 
 _A Simple Example:_ To calculate ___sin(x)___, the program can be implemented as series:
 ```
