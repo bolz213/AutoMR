@@ -30,8 +30,10 @@ if __name__ == '__main__':
                     print("    ----------")
                     print(f"    func_index is {func_index}, NOI_MIR_MOR_DIR_DOR is {parameters}:")
                     print(f"    MR candidate {index+1}:")
-                    print(f"    A is {A_candidates[index]}")
-                    print(f"    B is {B_candidates[index]}")
+                    print(f"    input relation: (shows the coefficients for constructing new input from the base input. Please see the paper for details.)")
+                    print(f"    {A_candidates[index]}")
+                    print(f"    output relation: (shows the coefficients for constructing the MR from the outputs. Please see the paper for details.)")
+                    print(f"    {B_candidates[index]}")
 
             # for the MRs stored in pkl format
             elif MRs_type.startswith(f"{func_index}_MRs_each") and MRs_type.endswith(".pkl"):
