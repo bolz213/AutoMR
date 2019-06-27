@@ -1,3 +1,6 @@
+# use this program to read the results in npz or pkl format
+# usage: run this program and provide the path the the result file
+
 import os
 import pickle
 import numpy as np
