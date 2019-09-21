@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import datetime
 
-import ProgramToInfer
+import settings
 import Phase1_PSOSearch
 
 
@@ -70,7 +70,7 @@ def get_cost_of_AB(program, func_index, A, B, i0_all, mode_input_relation, mode_
 
     return cost_of_AB
 
-def phase2():
+def phase2(output_path, parameters, func_index, output_name):
     no_of_inputcases = 100
 
     if os.path.isfile(f"{output_path}/"):
@@ -85,8 +85,8 @@ def phase2():
     degree_of_input_relation = parameters_int[3]
     degree_of_output_relation = parameters_int[4]
 
-    no_of_elements_input = ProgramToInfer.getNEI(func_index)
-    no_of_elements_output = ProgramToInfer.getNEO(func_index)
+    no_of_elements_input = settings.getNEI(func_index)
+    no_of_elements_output = settings.getNEO(func_index)
 
     A_candidates_after_filter = []
     B_candidates_after_filter = []
@@ -118,8 +118,8 @@ def phase2():
 
         if isPassPhase1:
             for index_test in range(100):
-                i0_all = Phase1_PSOSearch.generate_i0_all(ProgramToInfer.get_input_datatype(func_index), ProgramToInfer.get_input_range(func_index), no_of_inputcases)
-                survive_cost = get_cost_of_AB(ProgramToInfer.program, func_index, A, B, i0_all, mode_input_relation, mode_output_relation, degree_of_input_relation, degree_of_output_relation, no_of_elements_output)
+                i0_all = Phase1_PSOSearch.generate_i0_all(settings.get_input_datatype(func_index), settings.get_input_range(func_index), no_of_inputcases)
+                survive_cost = get_cost_of_AB(settings.program, func_index, A, B, i0_all, mode_input_relation, mode_output_relation, degree_of_input_relation, degree_of_output_relation, no_of_elements_output)
                 if survive_cost >= 0.05:
                     isPass = False
                     break
@@ -143,16 +143,16 @@ def phase2():
     file_statistics.loc[f"{func_index}_{parameters}", "phase1"] = ini_count
     file_statistics.loc[f"{func_index}_{parameters}", "phase2"] = survive_count
 
-    file_statistics.to_csv(f"{output_path}/counts.csv")
+    # file_statistics.to_csv(f"{output_path}/counts.csv")
 
     # print(f"\n----------")
     # print(f"file is {output_name}, func_index is {func_index}, parameters is {parameters}, all count is {all_count}, ini count is {ini_count}, survive count is {survive_count}")
 
 
-if __name__ == '__main__':
-    print("----------")
-    print("start phase2: filtering...")
-    output_path = ProgramToInfer.output_path
+def run_phase2():
+    # print("----------")
+    # print("start phase2: filtering...")
+    output_path = settings.output_path
 
     if os.path.isfile(f"{output_path}/performance.csv"):
         times = pd.read_csv(f"{output_path}/performance.csv", index_col=0)
@@ -171,10 +171,13 @@ if __name__ == '__main__':
             parameters = output_name[-13:-4]
 
             t1 = datetime.datetime.now()
-            phase2()
+            phase2(output_path, parameters, func_index, output_name)
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), 3)
 
             times.loc[f"{func_index}_{parameters}", "phase2"] = cost_time
 
-    times.to_csv(f"{output_path}/performance.csv")
+    # times.to_csv(f"{output_path}/performance.csv")
+
+if __name__ == '__main__':
+    run_phase2()

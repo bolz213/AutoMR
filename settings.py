@@ -89,21 +89,21 @@ def get_input_datatype(func_index):
 
 
 # which programs to infer MRs from
-func_indices = [7, 21]
+func_indices = [21]
 
 # which type of MRs to infer: NOI_MIR_MOR_DIR_DOR.
 # NOI: number of involved inputs
 # MIR, MOR: mode of input and output relations. 1-equal, 2-greaterthan, 3-lessthan
 # DIR, DOR: degrees of input and output relations. 1-linear, 2-quadratic, etc.
-parameters_collection = ["2_1_1_1_1", "2_1_2_1_1"]
+parameters_collection = ["2_1_1_1_1"]
 # parameters_collection = ["2_1_1_1_1", "2_1_1_1_2", "2_1_1_1_3", "3_1_1_1_1", "3_1_1_1_2", "2_1_2_1_1", "2_1_3_1_1", "2_2_1_1_1", "2_3_1_1_1", "2_2_2_1_1", "2_2_3_1_1", "2_3_2_1_1", "2_3_3_1_1"]
 
 # path to store results
 output_path = "./output/example"
 
 # search parameters
-pso_runs = 3
-pso_iterations = 50
+pso_runs = 5
+pso_iterations = 350
 
 # set type and search range for coeff_range, const_range
 coeff_type = int

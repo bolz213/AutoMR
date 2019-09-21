@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 import itertools
 import datetime
+
 from scipy import special
 import random
 
-import ProgramToInfer
+import settings
 
 # calculate how many combinations are there for choosing no_of_select elements from no_of_elements
 def get_size_of_comb(no_of_elements, no_of_select):
@@ -65,7 +66,7 @@ def generate_i(func_index, i0, comb_i0, A, mode_input_relation):
 
     # inequality input relation. Only applicable to 2 inputs now.
     else:
-        input_range = ProgramToInfer.get_input_range(func_index)
+        input_range = settings.get_input_range(func_index)
         min_input = np.zeros((i0.shape))
         max_input = np.zeros((i0.shape))
         for index in i0.shape[0]:
@@ -82,7 +83,7 @@ def generate_i(func_index, i0, comb_i0, A, mode_input_relation):
             i_1_to_end = np.random.uniform(low=i_1_to_end_min, high=i_1_to_end, size=i_1_to_end.shape)
             i = np.concatenate((i0.reshape(1, -1), i_1_to_end), axis=0)
 
-    input_types = ProgramToInfer.get_input_datatype(func_index)
+    input_types = settings.get_input_datatype(func_index)
     for index in range(i.shape[0]):
         i[index] = match_type(i[index], input_types)
     return i
@@ -225,7 +226,7 @@ class PSO:
     def generate_initial_A_all(self):
         A_all_cons = np.random.uniform(low=self.const_range[0], high=self.const_range[1],
                                        size=(self.no_of_particles, self.Ashape0, self.no_of_elements_input, 1))
-        if ProgramToInfer.const_type is int:
+        if settings.const_type is int:
             A_all_cons = np.round(A_all_cons)
         A_all_coeff = np.random.uniform(low=self.coeff_range[0], high=self.coeff_range[1], size=(
             self.no_of_particles, self.Ashape0, self.no_of_elements_input, (self.size_of_comb_i0 - 1)))
@@ -234,7 +235,7 @@ class PSO:
         for index_particle in range(self.no_of_particles):
             for index_input in range(self.no_of_inputs - 1):
                 A_all_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:] = anti_degrade(A_all_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:], 1)
-        if ProgramToInfer.coeff_type is int:
+        if settings.coeff_type is int:
             A_all_coeff = np.round(A_all_coeff)
 
         A_all = np.concatenate((A_all_cons, A_all_coeff), axis=3)
@@ -244,7 +245,7 @@ class PSO:
     def generate_initial_B_all(self):
         B_all_cons = np.random.uniform(low=self.const_range[0], high=self.const_range[1],
                                        size=(self.shape_of_B_all[0], 1))
-        if ProgramToInfer.const_type is int:
+        if settings.const_type is int:
             B_all_cons = np.round(B_all_cons)
 
         B_all_coeff = np.random.uniform(low=self.coeff_range[0], high=self.coeff_range[1],
@@ -253,7 +254,7 @@ class PSO:
         for index_particle in range(self.no_of_particles):
             B_all_coeff[index_particle:index_particle + 1, -self.indices_B_highest_degree:] = anti_degrade(
                 B_all_coeff[index_particle:index_particle + 1, -self.indices_B_highest_degree:], 1)
-        if ProgramToInfer.coeff_type is int:
+        if settings.coeff_type is int:
             B_all_coeff = np.round(B_all_coeff)
 
         B_all = np.concatenate((B_all_cons, B_all_coeff), axis=1)
@@ -320,9 +321,9 @@ class PSO:
             for index_input in range(self.no_of_inputs - 1):
                 A_all_next_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:] = anti_degrade(A_all_next_coeff[index_particle:index_particle + 1, index_input:index_input + 1, :, -self.indices_A_highest_degree:], 1)
 
-        if ProgramToInfer.const_type is int:
+        if settings.const_type is int:
             A_all_next_cons = np.round(A_all_next_cons)
-        if ProgramToInfer.coeff_type is int:
+        if settings.coeff_type is int:
             A_all_next_coeff = np.round(A_all_next_coeff)
 
         A_all_next = np.concatenate((A_all_next_cons, A_all_next_coeff), axis=3)
@@ -352,9 +353,9 @@ class PSO:
             B_all_next_coeff[index_particle: index_particle + 1, -self.indices_B_highest_degree:] = anti_degrade(
                 B_all_next_coeff[index_particle: index_particle + 1, -self.indices_B_highest_degree:], 1)
 
-        if ProgramToInfer.const_type is int:
+        if settings.const_type is int:
             B_all_next_cons = np.round(B_all_next_cons)
-        if ProgramToInfer.coeff_type is int:
+        if settings.coeff_type is int:
             B_all_next_coeff = np.round(B_all_next_coeff)
 
         B_all_next = np.concatenate((B_all_next_cons, B_all_next_coeff), axis=1)
@@ -408,7 +409,7 @@ class PSO:
     #     return A_all_p_best_next, B_all_p_best_next, index_g_best
 
     def run(self):
-        i0_all = generate_i0_all(ProgramToInfer.get_input_datatype(func_index), ProgramToInfer.get_input_range(func_index), self.no_of_inputcases)
+        i0_all = generate_i0_all(settings.get_input_datatype(self.func_index), settings.get_input_range(self.func_index), self.no_of_inputcases)
         A_all = self.generate_initial_A_all()
         B_all = self.generate_initial_B_all()
 
@@ -426,14 +427,14 @@ class PSO:
         omega_s = 0.9
         omega_e = 0.4
 
-        iterations = pso_iterations
-        iteration = 0
-        while iteration < iterations:
+        iterations = settings.pso_iterations
+        for iteration in range(iterations):
             omega = omega_s - (omega_s - omega_e) * ((iteration / iterations) ** 2)
             A_all, B_all, A_v_all, B_v_all, A_all_p_best, B_all_p_best, index_g_best, cost_of_AB_all_p_best = self.update_AB_all(
                 i0_all, A_all, A_v_all, B_all, B_v_all, A_all_p_best, B_all_p_best, index_g_best, omega,
                 cost_of_AB_all_p_best)
             min_cost = cost_of_AB_all_p_best[index_g_best]
+
             ## break the iteration in advance if solution is found
             # if self.mode_output_relation == 1:
             #     if min_cost < 1:
@@ -447,7 +448,6 @@ class PSO:
             # print("B:")
             # print(B_all_p_best[index_g_best])
             # print("----------")
-            iteration += 1
 
         A = A_all_p_best[index_g_best]
         B = B_all_p_best[index_g_best]
@@ -455,14 +455,14 @@ class PSO:
         return min_cost, A, B
 
 
-def phase1():
+def phase1(pso_runs, output_path, func_index, parameters, inputcases_range, const_range, coeff_range):
     if not os.path.isdir(output_path):
         os.mkdir(output_path)
     if not os.path.isdir(f"{output_path}/phase1"):
         os.mkdir(f"{output_path}/phase1")
 
-    no_of_elements_input = ProgramToInfer.getNEI(func_index)
-    no_of_elements_output = ProgramToInfer.getNEO(func_index)
+    no_of_elements_input = settings.getNEI(func_index)
+    no_of_elements_output = settings.getNEO(func_index)
 
 
     no_of_particles = 30
@@ -472,11 +472,19 @@ def phase1():
     A_candidates = []
     B_candidates = []
 
+    parameters_int = [int(e) for e in parameters.split("_")]
+    no_of_inputs = parameters_int[0]
+    mode_input_relation = parameters_int[1]
+    mode_output_relation = parameters_int[2]
+    degree_of_input_relation = parameters_int[3]
+    degree_of_output_relation = parameters_int[4]
+
     pso_run = 0
     while True:
         # print("====================")
-        print(f"    searching: func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run+1}.")
-        AutoMR = PSO(ProgramToInfer.program, func_index, no_of_inputs, mode_input_relation, mode_output_relation,
+        # print(f"    searching: func_index is {func_index}, parameters is {parameters}, pso_run is {pso_run+1}.")
+        # print(f'running pso run {pso_run+1}')
+        AutoMR = PSO(settings.program, func_index, no_of_inputs, mode_input_relation, mode_output_relation,
                      degree_of_input_relation, degree_of_output_relation, no_of_elements_input,
                      no_of_elements_output, no_of_particles, no_of_inputcases, inputcases_range,
                      const_range, coeff_range)
@@ -506,19 +514,19 @@ def phase1():
             break
 
 
-if __name__ == "__main__":
-    print("start phase1: searching for MRs...")
-    func_indices = ProgramToInfer.func_indices
-    parameters_collection = ProgramToInfer.parameters_collection
+def run_phase1():
+    # print("start phase1: searching for MRs...")
+    func_indices = settings.func_indices
+    parameters_collection = settings.parameters_collection
 
-    output_path = ProgramToInfer.output_path
+    output_path = settings.output_path
     if not os.path.isdir("{}".format(output_path)):
-        os.mkdir(output_path)
-    pso_runs = ProgramToInfer.pso_runs
-    pso_iterations = ProgramToInfer.pso_iterations
+        os.makedirs(output_path)
+    pso_runs = settings.pso_runs
+    pso_iterations = settings.pso_iterations
 
-    coeff_range = ProgramToInfer.coeff_range
-    const_range = ProgramToInfer.const_range
+    coeff_range = settings.coeff_range
+    const_range = settings.const_range
 
     if os.path.isfile(f"{output_path}/performance.csv"):
         times = pd.read_csv(f"{output_path}/performance.csv", index_col=0)
@@ -526,22 +534,17 @@ if __name__ == "__main__":
         times = pd.DataFrame()
 
     for func_index in func_indices:
-        inputcases_range = ProgramToInfer.get_input_range(func_index)
-
+        inputcases_range = settings.get_input_range(func_index)
         for parameters in parameters_collection:
-            parameters_int = [int(e) for e in parameters.split("_")]
-            no_of_inputs = parameters_int[0]
-            mode_input_relation = parameters_int[1]
-            mode_output_relation = parameters_int[2]
-            degree_of_input_relation = parameters_int[3]
-            degree_of_output_relation = parameters_int[4]
             t1 = datetime.datetime.now()
-            phase1()
+            phase1(pso_runs, output_path, func_index, parameters, inputcases_range, const_range, coeff_range)
             t2 = datetime.datetime.now()
             cost_time = np.round((t2-t1).total_seconds(), decimals=3)
 
             # times.loc[f"{func_index}_{parameters}", "pso_iterations"] = pso_iterations
             times.loc[f"{func_index}_{parameters}", "phase1"] = cost_time
 
-    times.to_csv(f"{output_path}/performance.csv")
+    # times.to_csv(f"{output_path}/performance.csv")
 
+if __name__ == '__main__':
+    run_phase1()

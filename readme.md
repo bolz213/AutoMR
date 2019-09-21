@@ -44,7 +44,7 @@ A virtual envoronement named "AutoMR" will be created together with the required
 
 ### 1. Subject Programs
 
-The information of the program which you want to infer MRs from should be configured in _ProgramToInfer.py_
+The information of the program which you want to infer MRs from should be configured in _settings.py_
 > 1. Encapsulate the program in _program(i, func_index)_. _i_ is an array containing all the values to be passed to the program. _func_index_ is the index assigned to the program, which can facilitate inferring MRs for various programs in a batch.
 > 2. Provide the number of elements of the input of the program in _getNEI(func_index)_.
 > 3. Provide the number of elements of the output of the program in _getNEO(func_index)_.
@@ -62,35 +62,31 @@ After setting up the subject programs and parameters, execute the following comm
 ```
 
 ## A minimal example
-The ___ProgramToInfer.py___ has already set up for inferring MRs for __sine__ program. You can just clone this repo and run `python main.py`, then after searching the results will be shown.
+The ___settings.py___ has already set up for inferring MRs for __sine__ program. You can just clone this repo and run `python main.py`, then after searching the results will be shown.
 
-The following code block shows an example run and the results. The search was run 3 times and after filtering and redundancy removal 2 MRs were kept. New inputs could be constructed as: `x1 = 9.42 + x0, x2 = 6.28 + x0, x3 = 9.42 - x0`. The two MRs were: `1.732sin(x0) + 0.577sin(x1) - 0.577sin(x2) - 0.577sin(x3) ≈ 0` and `0.707sin(x2) - 0.707sin(x3) ≈ 0`
-
+The following code block shows an example run and the results. The results can also be viewed as html file in the output folder.
 ```
 >>> python main.py
 =====Start Inferring=====
-start phase1: searching for MRs...
-    searching: func_index is 1, parameters is 2_1_1_1_1, pso_run is 1.
-    searching: func_index is 1, parameters is 2_1_1_1_1, pso_run is 2.
-    searching: func_index is 1, parameters is 2_1_1_1_1, pso_run is 3.
-----------
-start phase2: filtering...
-----------
-start phase3: removing redundancy...
-done
+start phase 1: searching ...
+start phase 2: filtering ...
+start phase 3: redundancy removing ...
 =====Results=====
+result file is 21_MRs_other_types_after_cs_svd.pkl
 ----------
-    ----------
-    func_index is 1, NOI_MIR_MOR_DIR_DOR is 2_1_1_1_1:
-    input relation A: (each row denotes the coefficients for constructing this input from the base input. Please see the paper for details.)
-    x1: [[9.42477796 1.        ]]
-    x2: [[6.28318531 1.        ]]
-    x3: [[ 9.42477796 -1.        ]]
-    output relation B: (each row represents one MR; column named '1' denotes the constant term; column named 'fx0_1' denotes the coefficient for the first element of output of x0; column named 'fx0_2' (if output has more than one elements) denotes the coefficient f
-or the second element of output of x0; column named 'fx1_1' denotes the coefficient for the first element of output of x1, etc.)
-              1      (fx0_1,)  (fx1_1,)  (fx2_1,)  (fx3_1,)
-0  2.101669e-17  1.732051e+00   0.57735 -0.577350 -0.577350
-1  7.408425e-17  1.110223e-16   0.00000  0.707107 -0.707107
+func_index is 21, NOI_MIR_MOR_DIR_DOR is 2_1_1_1_1:
+             1  prod(i0_1,)
+i1_1 -3.141593         -1.0
+i2_1  3.141593         -1.0
+i3_1 -9.424778         -1.0
+i4_1  3.141593          1.0
+i5_1 -9.424778          1.0
+                1   prod(o0_1,)  prod(o1_1,)  prod(o2_1,)  prod(o3_1,)  prod(o4_1,)  prod(o5_1,)
+MR1 -7.620898e-16  2.236068e+00    -0.447214    -0.447214    -0.447214     0.447214     0.447214
+MR2  1.005613e-16  2.359224e-16     0.000000    -0.206041     0.755483     0.618123    -0.068680
+MR3  1.613963e-16 -1.110223e-16     0.000000     0.135266     0.384900    -0.330794     0.850959
+MR4  1.067449e-16  2.220446e-16     0.000000     0.830211    -0.176345     0.508429     0.145437
+
 ```
 
 ### Associated Paper
