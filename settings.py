@@ -69,10 +69,7 @@ def getNEI(func_index):
     else:
         return 1
 
-# the number of elements of the output for the programs
-def getNEO(func_index):
-    return 1
-
+    
 # domain for each element of the input
 def get_input_range(func_index):
     if func_index in [7, 14, 18, 19]:
@@ -86,6 +83,10 @@ def get_input_datatype(func_index):
         return [float, float]
     else:
         return [float]
+    
+# the number of elements of the output for the programs
+def getNEO(func_index):
+    return 1
 
 
 # which programs to infer MRs from
@@ -96,7 +97,6 @@ func_indices = [21]
 # MIR, MOR: mode of input and output relations. 1-equal, 2-greaterthan, 3-lessthan
 # DIR, DOR: degrees of input and output relations. 1-linear, 2-quadratic, etc.
 parameters_collection = ["2_1_1_1_1"]
-# parameters_collection = ["2_1_1_1_1", "2_1_1_1_2", "2_1_1_1_3", "3_1_1_1_1", "3_1_1_1_2", "2_1_2_1_1", "2_1_3_1_1", "2_2_1_1_1", "2_3_1_1_1", "2_2_2_1_1", "2_2_3_1_1", "2_3_2_1_1", "2_3_3_1_1"]
 
 # path to store results
 output_path = "./output/example"
