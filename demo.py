@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
             map_relation = {1:"=", 2:">", 3:"<"}
 
-            with open(f"{MRs_path}/{k}.html", 'w') as _file:
+            with open(f"{MRs_path}/{func_index}_{k}.html", 'w') as _file:
                 _file.write(f'<p>func index is {func_index} </p>')
                 _file.write(f'<p>Mode of Input Relation is "{map_relation[MIR]}" </p>')
                 _file.write(f'<p>Mode of Output Relation is "{map_relation[MOR]}" </p>')
