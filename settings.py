@@ -3,6 +3,15 @@ import sys
 
 map_index_func = {1: 'sine'}
 
+# which programs to infer MRs from
+func_indices = [1]
+
+# which type of MRs to infer: NOI_MIR_MOR_DIR_DOR.
+# NOI: number of involved inputs
+# MIR, MOR: mode of input and output relations. 1-equal, 2-greaterthan, 3-lessthan
+# DIR, DOR: degrees of input and output relations. 1-linear, 2-quadratic, etc.
+parameters_collection = ["2_1_1_1_1"]
+
 # program to infer MR from
 # user can encapsulate his program under test here and assign it a func_index, which can be used to faciliate processing for multiple programs in a batch
 # i is the array containing the input arguments (note that unary input is treated as a special case of multi-variate input)
@@ -46,14 +55,6 @@ def getNEO(func_index):
         pass
 
 
-# which programs to infer MRs from
-func_indices = [1]
-
-# which type of MRs to infer: NOI_MIR_MOR_DIR_DOR.
-# NOI: number of involved inputs
-# MIR, MOR: mode of input and output relations. 1-equal, 2-greaterthan, 3-lessthan
-# DIR, DOR: degrees of input and output relations. 1-linear, 2-quadratic, etc.
-parameters_collection = ["2_1_1_1_1"]
 
 # path to store results
 output_path = "./output/example"
