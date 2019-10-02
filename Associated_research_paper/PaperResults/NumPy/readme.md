@@ -5,7 +5,7 @@ The MRs are grouped according to the parameters: FuncIndex_NoOfInputs_ModeOfInpu
 >   - They are the MRs for the program with FuncIndex 1,
 >   - The number of involved inputs is 2,
 >   - The mode of input relation is 1 (1 means equality, 2 means greater than, 3 means less than),
->   - The mode of output relation is 2,
+>   - The mode of output relation is 1,
 >   - The degree of the polynomial input relation is 1 (i.e., linear),
 >   - The degree of the polynomial output relation is 1 (i.e., linear).
 
